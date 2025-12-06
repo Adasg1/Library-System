@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from "react-router";
-import {authService} from "../services/authService.js";
+import {useAuth} from "../context/AuthContext.jsx";
 import {Link} from "react-router-dom";
 
 const RegisterPage = () => {
@@ -13,6 +13,9 @@ const RegisterPage = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    // pobieram funkcję register z Contextu
+    const {register} = useAuth();
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -23,8 +26,14 @@ const RegisterPage = () => {
             return;
         }
         try {
-            await authService.register(formData);
-            navigate("/login");
+            const result = await register(formData);
+
+            if(result.success) {
+                setError("");
+                navigate("/login");
+            } else {
+                setError(result.error || "Błąd rejestracji");
+            }
         } catch (err){
             setError("Rejestracja się nie powiodła. Spróbuj ponownie.");
             console.error(err);
