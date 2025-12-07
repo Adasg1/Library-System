@@ -29,4 +29,53 @@ public class Loan {
     private LocalDateTime dueDate;
 
     private LocalDateTime returnDate;
+
+    public Loan(User user, BookCopy bookCopy, LocalDateTime rentalDate, LocalDateTime dueDate){
+        this.user = user;
+        this.bookCopy = bookCopy;
+        this.rentalDate = rentalDate;
+        this.dueDate = dueDate;
+    }
+
+    //region getters-setters
+    public int getLoanId() {
+        return loanId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public BookCopy getBookCopy() {
+        return bookCopy;
+    }
+
+    public LoanStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(LoanStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getRentalDate() {
+        return rentalDate;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public LocalDateTime getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(LocalDateTime returnDate) {
+        this.returnDate = returnDate;
+    }
+    //endregion
 }

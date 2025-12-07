@@ -22,6 +22,9 @@ public class Category {
         )
     private List<Book> books;
 
+    public Category(String name){
+        this.categoryName = name;
+    }
 
     //region getters-setters
     public int getCategoryId() {
@@ -40,8 +43,12 @@ public class Category {
         return books;
     }
 
-    public void setBooks(List<Book> books) {
-        this.books = books;
+    public boolean addBook(Book book){
+        return this.books.add(book);
+    }
+
+    public boolean removeBook(Book book){
+        return this.books.remove(book);
     }
     //endregion
 

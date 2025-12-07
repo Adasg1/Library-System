@@ -15,4 +15,27 @@ public class BookCopy {
     private Book book;
 
     private BookStatus status;
+
+    public BookCopy(Book book, BookStatus status){
+        this.book = book;
+        this.status = status;
+    }
+
+    //region getters-setters
+    public int getBookCopyId() {
+        return bookCopyId;
+    }
+
+    public Book getBook() {
+        return book;
+    }
+
+    public BookStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookStatus status) {
+        this.status = status;
+    }
+    //endregion
 }
