@@ -1,6 +1,7 @@
 package pl.edu.agh.to.library.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.loan.Loan;
 import pl.edu.agh.to.library.loan.Reservation;
@@ -13,6 +14,7 @@ public class User {
 
     @Id
     @GeneratedValue
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private int userId;
 
     private String firstName;
