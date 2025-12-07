@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.model.enums;
+package pl.edu.agh.to.library.book;
 
 public enum BookStatus {
     AVAILABLE,

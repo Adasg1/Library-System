@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.model.enums;
+package pl.edu.agh.to.library.loan;
 
 public enum ReservationStatus {
     WAITING,

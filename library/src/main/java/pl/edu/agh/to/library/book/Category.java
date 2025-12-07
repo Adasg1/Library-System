@@ -1,13 +1,25 @@
-package pl.edu.agh.to.library.model;
+package pl.edu.agh.to.library.book;
+
+import jakarta.persistence.*;
 
 import java.util.List;
 
+@Entity
+@Table(name="Categories")
 public class Category {
 
+    @Id
+    @GeneratedValue
     private int categoryId;
 
     private String categoryName;
 
+    @ManyToMany
+    @JoinTable(
+            name="BookCategories",
+            joinColumns=@JoinColumn(name="categoryId"),
+            inverseJoinColumns=@JoinColumn(name="bookId")
+        )
     private List<Book> books;
 
 
