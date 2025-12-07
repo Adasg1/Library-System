@@ -1,5 +1,6 @@
 package pl.edu.agh.to.library.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.loan.Loan;
 import pl.edu.agh.to.library.loan.Reservation;
@@ -26,9 +27,11 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Loan> loans;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Reservation> reservations;
 
     public User(String firstName,String lastName, String email, String hashedPassword, Role role){
@@ -37,6 +40,9 @@ public class User {
         this.email = email;
         this.hashedPassword = hashedPassword;
         this.role = role;
+    }
+
+    public User() {
     }
 
     //region getters-setters

@@ -37,6 +37,9 @@ public class Loan {
         this.dueDate = dueDate;
     }
 
+    public Loan() {
+    }
+
     //region getters-setters
     public int getLoanId() {
         return loanId;

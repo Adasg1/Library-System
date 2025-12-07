@@ -49,6 +49,9 @@ public class Book {
         this.publishYear = publishYear;
     }
 
+    public Book() {
+    }
+
 
     //region getters-setters
     public int getBookId() {
