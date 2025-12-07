@@ -1,7 +1,11 @@
 import React, {useState} from 'react';
 import {useNavigate} from "react-router";
 import {useAuth} from "../context/AuthContext.jsx";
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
+
+const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -21,10 +25,22 @@ const RegisterPage = () => {
     };
 
     const handleRegister = async () => {
+        // walidacja uzupełnienia wszystkich pól
         if(!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
             setError("Wszystkie pola są wymagane.");
             return;
         }
+
+        if (!validateEmail(formData.email)) {
+            setError("Wprowadź poprawny adres e-mail.");
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setError("Hasło musi mieć co najmniej 8 znaków.");
+            return;
+        }
+
         try {
             const result = await register(formData);
 
