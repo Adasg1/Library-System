@@ -14,8 +14,14 @@ const HomePage = () => {
                 // widok dla zalogowanego użytkownika
                 <div>
                     <h2>Witaj, {user.firstName}.</h2>
-                    <button onClick={logout}>Wyloguj się</button>
+                    <div style={{display: "flex", gap: "20px", justifyContent: "center", marginTop: "20px"}}>
+                        <Link to="/profile">
+                            <button>Widok profilu</button>
+                        </Link>
+                        <button onClick={logout}>Wyloguj się</button>
+                    </div>
                 </div>
+
             ) : (
                 // widok dla niezalogowanego użytkownika
                 <div style={{display: "flex", gap: "20px", justifyContent: "center", marginTop: "20px"}}>

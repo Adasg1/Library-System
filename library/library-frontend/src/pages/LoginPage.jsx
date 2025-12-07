@@ -1,7 +1,11 @@
 import React, {useState} from 'react';
 import {useNavigate} from "react-router";
 import {useAuth} from "../context/AuthContext.jsx";
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
+
+const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -13,8 +17,14 @@ const LoginPage = () => {
     const {login} = useAuth();
 
     const handleLogin = async () => {
+        // walidacja uzupełnienia wszystkich pól
         if( !email || !password ) {
             setError("Wszystkie pola są wymagane.");
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            setError("Wprowadź poprawny adres e-mail.");
             return;
         }
 

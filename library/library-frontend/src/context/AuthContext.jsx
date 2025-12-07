@@ -5,6 +5,8 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = React.useState(null);
+    // stan do śledzenia, czy kontekst zakończył inicjalizację
+    const [isLoading, setIsLoading] = React.useState(true);
 
     // przy starcie aplikacji sprawdzam, czy w localStorage jest token i user
     useEffect(() => {
@@ -13,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         if (storedUser && token) {
             setUser(JSON.parse(storedUser));
         }
+        setIsLoading(false);
     }, []);
 
     const login = async (email, password) => {
@@ -45,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register }}>
+        <AuthContext.Provider value={{ user, login, logout, register, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
