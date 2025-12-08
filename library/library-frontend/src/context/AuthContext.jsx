@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const decodedUser = jwtDecode(token)
+            const response = await authService.login(email, password);
+            if (response.token) {
+                const decodedUser = jwtDecode(response.token)
                 setUser(decodedUser);
                 return {success: true, msg: 'Logowanie pomyślne'};
             }
