@@ -11,21 +11,46 @@ export const AuthProvider = ({ children }) => {
 
     // przy starcie aplikacji sprawdzam, czy w localStorage jest token i user
     useEffect(() => {
-        //const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
-        if (token) {
-            const decodedUser = jwtDecode(token)
-            setUser(decodedUser);
+        const initUser = async () => {
+            const token = localStorage.getItem('token');
+            console.log("Token z localStorage:", token);
+            if (token) {
+                try {
+                    const userData = await authService.getCurrentUser();
+                    console.log("Dane użytkownika z backendu:", userData);
+                    if (userData) {
+                        setUser({
+                            firstName: userData.firstName,
+                            lastName: userData.lastName,
+                            email: userData.email,
+                            role: userData.role
+                        });
+                        console.log("Użytkownik ustawiony w kontekście:", userData);
+                    } else {
+                        console.log("Brak tokenu w localStorage, ustawiam user=null");
+                        setUser(null);
+                    }
+                } catch (err) {
+                    console.error("Błąd ładowania użytkownika:", err);
+                    setUser(null);
+                }
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
+
+        initUser();
     }, []);
 
     const login = async (email, password) => {
         try {
             const response = await authService.login(email, password);
             if (response.token) {
-                const decodedUser = jwtDecode(response.token)
-                setUser(decodedUser);
+                setUser({
+                    firstName: response.firstName,
+                    lastName: response.lastName,
+                    email: response.email,
+                    role: response.role
+                });
                 return {success: true, msg: 'Logowanie pomyślne'};
             }
         } catch(err) {
@@ -42,8 +67,16 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            await authService.register(userData);
-            return {success: true};
+            const response = await authService.register(userData);
+            if (response.token) {
+                setUser({
+                    firstName: response.firstName,
+                    lastName: response.lastName,
+                    email: response.email,
+                    role: response.role
+                });
+                return {success: true, msg: 'Rejestracja przebiegła pomyślnie'};
+            }
         } catch(err) {
             console.error(err);
             return {success: false, msg: 'Błąd rejestracji'};

@@ -2,12 +2,14 @@ package pl.edu.agh.to.library.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import pl.edu.agh.to.library.user.dto.UserResponse;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(path="user")
+@RequestMapping(path="/api/user")
 public class UserController {
 
     private final UserService userService;
@@ -27,6 +29,19 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User user){
+        var response = new UserResponse(
+                user.getUserId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUsername(),
+                user.getRole().name()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

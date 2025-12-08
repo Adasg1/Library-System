@@ -36,7 +36,7 @@ const RegisterPage = () => {
             return;
         }
 
-        if (formData.password.length < 6) {
+        if (formData.password.length < 8) {
             setError("Hasło musi mieć co najmniej 8 znaków.");
             return;
         }
@@ -46,7 +46,7 @@ const RegisterPage = () => {
 
             if(result.success) {
                 setError("");
-                navigate("/login");
+                navigate("/");
             } else {
                 setError(result.error || "Błąd rejestracji");
             }

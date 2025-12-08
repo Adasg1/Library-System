@@ -37,7 +37,7 @@ public class AuthService {
 
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
-        return new AuthenticationResponse(jwt);
+        return new AuthenticationResponse(jwt, user.getUsername(), user.getFirstName(), user.getLastName(), user.getRole().name());
     }
 
     public AuthenticationResponse login(LoginRequest request){
@@ -48,6 +48,6 @@ public class AuthService {
             throw new BadCredentialsException("Invalid password");
         }
         var jwt =  jwtService.generateToken(user);
-        return new AuthenticationResponse(jwt);
+        return new AuthenticationResponse(jwt, user.getUsername(), user.getFirstName(), user.getLastName(), user.getRole().name());
     }
 }

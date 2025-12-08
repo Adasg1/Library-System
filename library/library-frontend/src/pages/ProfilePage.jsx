@@ -4,6 +4,7 @@ import {Link} from "react-router";
 
 const ProfilePage = () => {
     const { user } = useAuth();
+
     return (
         <div>
             <h1>Strona Profilu</h1>
