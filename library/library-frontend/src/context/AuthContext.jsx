@@ -1,5 +1,6 @@
 import React, {createContext, useContext, useEffect} from 'react';
 import {authService} from "../services/authService.js";
+import {jwtDecode} from "jwt-decode";
 
 const AuthContext = createContext(null);
 
@@ -10,19 +11,21 @@ export const AuthProvider = ({ children }) => {
 
     // przy starcie aplikacji sprawdzam, czy w localStorage jest token i user
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        //const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
+        if (token) {
+            const decodedUser = jwtDecode(token)
+            setUser(decodedUser);
         }
         setIsLoading(false);
     }, []);
 
     const login = async (email, password) => {
         try {
-            const result = await authService.login(email, password);
-            if (result.token) {
-                setUser(result.user);
+            const token = localStorage.getItem('token');
+            if (token) {
+                const decodedUser = jwtDecode(token)
+                setUser(decodedUser);
                 return {success: true, msg: 'Logowanie pomyślne'};
             }
         } catch(err) {
