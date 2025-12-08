@@ -35,11 +35,11 @@ public class UserService {
                     if (userDetails.getLastName() != null && !userDetails.getLastName().isEmpty()) {
                         existingUser.setLastName(userDetails.getLastName());
                     }
-                    if (userDetails.getEmail() != null && !userDetails.getEmail().isEmpty()) {
-                        existingUser.setEmail(userDetails.getEmail());
+                    if (userDetails.getUsername() != null && !userDetails.getUsername().isEmpty()) {
+                        existingUser.setEmail(userDetails.getUsername());
                     }
-                    if (userDetails.getHashedPassword() != null) {
-                        existingUser.setHashedPassword(userDetails.getHashedPassword());
+                    if (userDetails.getPassword() != null) {
+                        existingUser.setPassword(userDetails.getPassword());
                     }
                     if (userDetails.getRole() != null) {
                         existingUser.setRole(userDetails.getRole());
