@@ -4,7 +4,10 @@
 * Java
 * Spring
 
-## Model
+## Model bazodanowy
+![database](./Library-database.png)
+
+## Model obiektowy
 ![UML](./Library-UML.png)
 
 ### User
@@ -36,6 +39,3 @@ Przedstawia rezerwacje książek. Rezerwacje mogą być użyte gdy użytkownik 
 
 ### ReservationStatus
 Enumerator - status rezerwacji
-
-## Model w bazie danych
-![database](./Library-database.png)
