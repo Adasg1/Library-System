@@ -1,5 +1,6 @@
 package pl.edu.agh.to.library.book;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -20,10 +21,15 @@ public class Category {
             joinColumns=@JoinColumn(name="categoryId"),
             inverseJoinColumns=@JoinColumn(name="bookId")
         )
+    @JsonIgnore
     private List<Book> books;
 
-    public Category(String name){
-        this.categoryName = name;
+    public Category(String categoryName){
+        this.categoryName = categoryName;
+    }
+
+    public Category(){
+
     }
 
     //region getters-setters
