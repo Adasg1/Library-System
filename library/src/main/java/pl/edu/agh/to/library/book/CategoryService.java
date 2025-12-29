@@ -15,10 +15,16 @@ public class CategoryService {
     }
 
     public Category createCategory(Category category){
+        if (categoryRepository.findByCategoryName(category.getCategoryName()).isPresent())
+            throw new IllegalArgumentException("Category by that name already exists");
+
         return categoryRepository.save(category);
     }
 
     public Category updateName(int id, String name){
+        if (categoryRepository.findByCategoryName(name).isPresent())
+            throw new IllegalArgumentException("Category by that name already exists");
+
         return categoryRepository.findById(id).map(
                 category -> {
                     category.setCategoryName(name);

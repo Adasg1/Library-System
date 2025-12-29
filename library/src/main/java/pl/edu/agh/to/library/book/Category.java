@@ -13,6 +13,7 @@ public class Category {
     @GeneratedValue
     private int categoryId;
 
+    @Column(unique = true)
     private String categoryName;
 
     @ManyToMany

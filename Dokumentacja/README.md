@@ -84,6 +84,119 @@ Enumerator - status rezerwacji
 
 <img width="2760" height="410" alt="image" src="https://github.com/user-attachments/assets/edf2cc41-0662-46ec-a1b7-3cd06b2aa534" />
 
+
+
+
+## Operacje CRUD dla książek
+
+### Dodawanie nowej kategorii
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/category/add**  
+```json
+{
+    "categoryName": "nazwa kategorii"
+}
+```
+
+**Zwraca:**
+```json
+{
+  "categoryId": 68,
+  "categoryName": "nazwa kategorii"
+}
+```
+
+**Możliwe błędy:**
+
+> `409 - Category by that name already exists` gdy istnieje już kategoria o podanej nazwie  
+
+
+
+### Zmienianie nazwy kategorii
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`PUT` /api/category/{id}** 
+```json
+{
+    "categoryName": "nowa nazwa kategorii"
+}
+```
+
+**Zwraca:** *(dla id = 68)*
+```json
+{
+  "categoryId": 68,
+  "categoryName": "nowa nazwa kategorii"
+}
+```
+
+**Możliwe błędy:**
+
+> `409 - Category by that name already exists` gdy istnieje już kategoria o podanej nazwie
+
+> `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
+### Pobieranie listy kategorii
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/category**  
+
+**Zwraca:**
+```json
+[
+  {
+    "categoryId": 112,
+    "categoryName": "action"
+  },
+  {
+    "categoryId": 113,
+    "categoryName": "adventure"
+  },
+  {
+    "categoryId": 106,
+    "categoryName": "comedy"
+  },
+  {
+    "categoryId": 68,
+    "categoryName": "nowa nazwa kategorii"
+  }
+]
+```
+
+### Pobieranie jednej kategorii
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/category/{id}**  
+
+**Zwraca:** *(dla id = 68)*
+```json
+{
+  "categoryId": 68,
+  "categoryName": "nowa nazwa kategorii"
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
+### Usuwanie kategorii
+
+Dostępne dla: `ADMIN`
+
+**`DELETE` /api/category/{id}**  
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
+
+
 ## Wygląd i działanie aplikacji
 
 ### Strona główna
