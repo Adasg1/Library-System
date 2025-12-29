@@ -3,6 +3,7 @@ package pl.edu.agh.to.library.book;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,6 +28,7 @@ public class Category {
 
     public Category(String categoryName){
         this.categoryName = categoryName;
+        this.books = new ArrayList<>();
     }
 
     public Category(){

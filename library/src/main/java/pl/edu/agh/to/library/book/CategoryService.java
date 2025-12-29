@@ -16,14 +16,14 @@ public class CategoryService {
 
     public Category createCategory(Category category){
         if (categoryRepository.findByCategoryName(category.getCategoryName()).isPresent())
-            throw new IllegalArgumentException("Category by that name already exists");
+            throw new IllegalStateException("Category by that name already exists");
 
         return categoryRepository.save(category);
     }
 
     public Category updateName(int id, String name){
         if (categoryRepository.findByCategoryName(name).isPresent())
-            throw new IllegalArgumentException("Category by that name already exists");
+            throw new IllegalStateException("Category by that name already exists");
 
         return categoryRepository.findById(id).map(
                 category -> {
@@ -39,6 +39,10 @@ public class CategoryService {
 
     public Optional<Category> getCategoryById(int id){
         return categoryRepository.findById(id);
+    }
+
+    public Optional<Category> getCategoryByName(String name){
+        return categoryRepository.findByCategoryName(name);
     }
 
 

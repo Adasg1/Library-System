@@ -5,7 +5,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.to.library.user.User;
 
 import java.util.List;
 
@@ -59,10 +58,9 @@ public class CategoryController {
             return ResponseEntity.notFound().build();
         }
     }
-    
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleException(IllegalArgumentException ex) {
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleException(IllegalStateException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,ex.getMessage());
     }
 

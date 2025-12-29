@@ -89,6 +89,7 @@ Enumerator - status rezerwacji
 
 ## Operacje CRUD dla książek
 
+
 ### Dodawanie nowej kategorii
 
 Dostępne dla: `ADMIN`, `LIBRARIAN`
@@ -113,7 +114,6 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 > `409 - Category by that name already exists` gdy istnieje już kategoria o podanej nazwie  
 
 
-
 ### Zmienianie nazwy kategorii
 
 Dostępne dla: `ADMIN`, `LIBRARIAN`
@@ -125,7 +125,7 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 }
 ```
 
-**Zwraca:** *(dla id = 68)*
+**Zwraca:** *(tu dla id = 68)*
 ```json
 {
   "categoryId": 68,
@@ -138,6 +138,7 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 > `409 - Category by that name already exists` gdy istnieje już kategoria o podanej nazwie
 
 > `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
 
 ### Pobieranie listy kategorii
 
@@ -167,13 +168,14 @@ Dostępne dla: `Brak ograniczeń`
 ]
 ```
 
+
 ### Pobieranie jednej kategorii
 
 Dostępne dla: `Brak ograniczeń`
 
 **`GET` /api/category/{id}**  
 
-**Zwraca:** *(dla id = 68)*
+**Zwraca:** *(tu dla id = 68)*
 ```json
 {
   "categoryId": 68,
@@ -184,6 +186,7 @@ Dostępne dla: `Brak ograniczeń`
 **Możliwe błędy:**
 
 > `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
 
 ### Usuwanie kategorii
 
@@ -196,6 +199,147 @@ Dostępne dla: `ADMIN`
 > `404 - Not Found` gdy kategoria o podanym id nie istnieje
 
 
+### Dodawanie nowej książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/book/add**  
+```json
+{
+  "title": "Tytuł Książki",
+  "isbn": "123-45-6789-101-1",
+  "author": "Autor książki",
+  "description": "Opis książki, może być długi",
+  "publisher": "Wydawca",
+  "publishYear": 2026,
+  "categoryNames": [
+    "action",
+    "adventure"
+  ]
+}
+```
+
+**Zwraca:**
+```json
+{
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "isbn": "123-45-6789-101-1",
+  "author": "Autor książki",
+  "description": "Opis książki, może być długi",
+  "publisher": "Wydawca",
+  "publishYear": 2026,
+  "categoryNames": [
+    "adventure",
+    "action"
+  ]
+}
+```
+
+**Możliwe błędy:**
+
+//TODO
+> Gdy kategoria o danej nazwie nie istnieje w bazie to jest pomijana, by ją dodać trzeba osobno stworzyć nową kategorię po czym edytować opis książki.
+
+
+### Pobieranie listy książek (pełny opis)
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/book/full**  
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "isbn": "123-45-6789-101-1",
+    "author": "Autor książki",
+    "description": "Opis książki, może być długi",
+    "publisher": "Wydawca",
+    "publishYear": 2026,
+    "categoryNames": [
+      "action",
+      "adventure"
+    ]
+  }
+]
+```
+
+### Pobieranie listy książek (tylko tytuł i autor)
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/book/brief**  
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki"
+  }
+]
+```
+
+### Pobieranie jednej książki (pełny opis)
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/book/full/{id}**  
+
+**Zwraca:** *(tu dla id = 1)*
+```json
+{
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "isbn": "123-45-6789-101-1",
+  "author": "Autor książki",
+  "description": "Opis książki, może być długi",
+  "publisher": "Wydawca",
+  "publishYear": 2026,
+  "categoryNames": [
+    "action",
+    "adventure"
+  ]
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy książka o podanym id nie istnieje
+
+
+### Pobieranie jednej książki (tylko tytuł i autor)
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/book/brief/{id}**  
+
+**Zwraca:** *(tu dla id = 1)*
+```json
+{
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "author": "Autor książki"
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy książka o podanym id nie istnieje
+
+### Usuwanie książki
+
+Dostępne dla: `ADMIN`
+
+**`DELETE` /api/book/{id}**  
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy książka o podanym id nie istnieje
 
 ## Wygląd i działanie aplikacji
 

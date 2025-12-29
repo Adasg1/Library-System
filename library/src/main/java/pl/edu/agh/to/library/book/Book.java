@@ -1,10 +1,14 @@
 package pl.edu.agh.to.library.book;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.loan.Reservation;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name="Books")
@@ -21,6 +25,7 @@ public class Book {
 
     private String author;
 
+    @Column(columnDefinition = "longtext")
     private String description;
 
     private String publisher;
@@ -33,20 +38,27 @@ public class Book {
             joinColumns=@JoinColumn(name="bookId"),
             inverseJoinColumns=@JoinColumn(name="categoryId")
     )
+    @JsonIgnore
     private Set<Category> categories;
 
     @OneToMany(mappedBy = "book")
+    @JsonIgnore
     private List<BookCopy> bookCopies;
 
     @OneToMany(mappedBy = "book")
+    @JsonIgnore
     private List<Reservation> reservations;
 
-    public Book(String title, String isbn,String author,String publisher,int publishYear){
+    public Book(String title, String isbn,String author,String description,String publisher,int publishYear){
         this.title = title;
         this.isbn = isbn;
         this.author = author;
+        this.description = description;
         this.publisher = publisher;
         this.publishYear = publishYear;
+        this.categories = new HashSet<>();
+        this.bookCopies = new ArrayList<>();
+        this.reservations = new ArrayList<>();
     }
 
     public Book() {
@@ -108,6 +120,10 @@ public class Book {
 
     public Set<Category> getCategories() {
         return categories;
+    }
+
+    public List<String> getCategoryNames() {
+        return categories.stream().map(Category::getCategoryName).toList();
     }
 
     public void addCategory(Category category) {
