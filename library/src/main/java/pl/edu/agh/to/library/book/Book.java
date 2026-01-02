@@ -25,7 +25,7 @@ public class Book {
 
     private String author;
 
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String publisher;
