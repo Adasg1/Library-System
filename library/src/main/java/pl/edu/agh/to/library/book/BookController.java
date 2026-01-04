@@ -22,7 +22,6 @@ public class BookController {
         this.bookService = bookService;
     }
 
-
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<BookFullResponse> addBook(@RequestBody BookCreationRequest request){
