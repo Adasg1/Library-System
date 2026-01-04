@@ -3,7 +3,7 @@ import api from "./api";
 export const userService = {
     async getUsers() {
         try {
-            const response = await api.get("/users");
+            const response = await api.get("/user");
             return response.data;
         } catch (error) {
             console.error(error);
@@ -12,16 +12,16 @@ export const userService = {
     },
 
     async getUserById(id) {
-        const response = await api.get(`/users/${id}`);
+        const response = await api.get(`/user/${id}`);
         return response.data;
     },
 
     async updateUser(id, userData) {
-        const response = await api.put(`/users/${id}`, userData);
+        const response = await api.put(`/user/${id}`, userData);
         return response.data;
     },
 
     async deleteUser(id) {
-        await api.delete(`/users/${id}`);
+        await api.delete(`/user/${id}`);
     }
 };

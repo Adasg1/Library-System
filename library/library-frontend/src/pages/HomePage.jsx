@@ -5,32 +5,44 @@ import {useAuth} from "../context/AuthContext.jsx";
 const HomePage = () => {
     const {user, logout} = useAuth();
 
+    const isStaff = user?.role === 'ADMIN' || user?.role === 'LIBRARIAN';
+
     return (
-        <div>
-            <h1>Biblioteka</h1>
-            <p>Witamy w systemie do obsługi biblioteki.</p>
+        <div className="home-container">
+            <header className="home-header">
+                <h2>Witamy w systemie do obsługi biblioteki.</h2>
+            </header>
 
             {user ? (
                 // widok dla zalogowanego użytkownika
-                <div>
+                <div className="dashboard">
                     <h2>Witaj, {user.firstName}.</h2>
-                    <div style={{display: "flex", gap: "20px", justifyContent: "center", marginTop: "20px"}}>
-                        <Link to="/profile">
-                            <button>Widok profilu</button>
+                    <div className="tiles-grid">
+                        {/* Kafelek 1 - katalog książek */}
+                        <Link to="/books" className="tile">
+                            <h3>Przeglądaj katalog</h3>
+                            <p>Zobacz dostępne tytuły i wypożycz coś dla siebie.</p>
                         </Link>
-                        <button onClick={logout}>Wyloguj się</button>
+
+                        {/* Kafelek 2 - profil */}
+                        <Link to="/profile" className="tile">
+                            <h3>Mój profil</h3>
+                            <p>Sprawdź swoje dane.</p>
+                        </Link>
+
+                        {/* Kafelki ADMINA i Bibliotekarza */}
+                        {isStaff && (
+                            <Link to="/books/new" className="admin-tile">
+                                <h3>Dodaj Książkę</h3>
+                                <p>Wprowadź nową pozycję do systemu.</p>
+                            </Link>
+                        )}
                     </div>
                 </div>
-
             ) : (
-                // widok dla niezalogowanego użytkownika
-                <div style={{display: "flex", gap: "20px", justifyContent: "center", marginTop: "20px"}}>
-                    <Link to="/login">
-                        <button>Zaloguj się</button>
-                    </Link>
-                    <Link to="/register">
-                        <button>Zarejestruj się</button>
-                    </Link>
+                // Widok dla niezalogowanego użytkownika
+                <div className="guest-section">
+                    <p>Zaloguj się, aby przeglądać katalog i wypożyczać książki.</p>
                 </div>
             )}
         </div>
