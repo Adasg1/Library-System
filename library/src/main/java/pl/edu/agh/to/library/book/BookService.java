@@ -2,6 +2,7 @@ package pl.edu.agh.to.library.book;
 
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
+import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,12 @@ public class BookService {
     }
 
     public Book createBook(BookCreationRequest request){
+        if (!isIsbnValid(request.isbn()))
+            throw new IllegalArgumentException("The ISBN number is not valid");
+
+        if (bookRepository.findByIsbn(request.isbn()).isPresent())
+            throw new IllegalStateException("Book with this ISBN already exists");
+
         Book book = new Book(
                 request.title(),
                 request.isbn(),
@@ -29,12 +36,60 @@ public class BookService {
 
         for (String name : request.categoryNames()){
             Optional<Category> cat = categoryService.getCategoryByName(name);
-            if (cat.isEmpty()) continue;
+            if (cat.isEmpty())
+                throw new NullPointerException("Category '" + name + "' not found");
             book.addCategory(cat.get());
         }
 
         return bookRepository.save(book);
     }
+
+    public Book updateBook(int id,BookUpdateRequest request){
+        Optional<Book> bookO = bookRepository.findById(id);
+
+        if (bookO.isEmpty())
+            throw new NullPointerException("Book by that id not found");
+        Book book = bookO.get();
+
+        if (request.isbn() != null){
+            if (!isIsbnValid(request.isbn()))
+                throw new IllegalArgumentException("The ISBN number is not valid");
+
+            if (bookRepository.findByIsbn(request.isbn()).isPresent())
+                throw new IllegalStateException("Book with this ISBN already exists");
+
+            book.setIsbn(request.isbn());
+        }
+
+        if (request.categoryNames() != null){
+            book.removeAllCategories();
+
+            for (String name : request.categoryNames()){
+                Optional<Category> cat = categoryService.getCategoryByName(name);
+                if (cat.isEmpty())
+                    throw new NullPointerException("Category '" + name + "' not found");
+                book.addCategory(cat.get());
+            }
+        }
+
+        if (request.title() != null)
+            book.setTitle(request.title());
+
+        if (request.author() != null)
+            book.setAuthor(request.author());
+
+        if (request.description() != null)
+            book.setDescription(request.description());
+
+        if (request.publisher() != null)
+            book.setPublisher(request.publisher());
+
+        if (request.publishYear() != null)
+            book.setPublishYear(request.publishYear());
+
+        return bookRepository.save(book);
+    }
+
 
     public List<Book> getAllBooks(){
         return bookRepository.findAll();
@@ -52,9 +107,42 @@ public class BookService {
         return false;
     }
 
+
     private boolean isIsbnValid(String isbn){
-        //TODO
-        return true;
+        if (isbn.length() != 13 && isbn.length() != 17)
+            return false;
+
+        String numbers = isbn.replaceAll("-","");
+        try {
+            if (numbers.length() == 10) {
+                //From https://en.wikipedia.org/wiki/ISBN
+                int i, s = 0, t = 0;
+
+                for (i = 0; i < 10; ++i) {
+                    if (numbers.charAt(i) != 'X') {
+                        t += Character.getNumericValue(numbers.charAt(i));
+                    } else {
+                        t += 10;
+                    }
+                    s += t;
+                }
+                return s % 11 == 0;
+            } else if (numbers.length() == 13) {
+                int s = 0;
+                for (int i = 0; i < 13; i++) {
+                    int a = Character.getNumericValue(numbers.charAt(i));
+                    if (i % 2 == 1) {
+                        a *= 3;
+                    }
+                    s += a;
+                }
+                return s % 10 == 0;
+            }
+        } catch (Exception e){
+            return false;
+        }
+
+        return false;
     }
 
 }

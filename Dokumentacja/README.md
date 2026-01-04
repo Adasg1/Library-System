@@ -207,7 +207,7 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 ```json
 {
   "title": "Tytuł Książki",
-  "isbn": "123-45-6789-101-1",
+  "isbn": "83-8257-131-X",
   "author": "Autor książki",
   "description": "Opis książki, może być długi",
   "publisher": "Wydawca",
@@ -224,7 +224,7 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 {
   "bookId": 1,
   "title": "Tytuł Książki",
-  "isbn": "123-45-6789-101-1",
+  "isbn": "83-8257-131-X",
   "author": "Autor książki",
   "description": "Opis książki, może być długi",
   "publisher": "Wydawca",
@@ -238,8 +238,56 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 
 **Możliwe błędy:**
 
-//TODO
-> Gdy kategoria o danej nazwie nie istnieje w bazie to jest pomijana, by ją dodać trzeba osobno stworzyć nową kategorię po czym edytować opis książki.
+> `400 - The ISBN number is not valid` gdy suma kontrolna numeru ISBN nie jest poprawna, system akceptuje 10 i 13-cyfrowe numery ISBN przedzielone myślnikami
+
+> `409 - Book with this ISBN already exists` gdy w bazie jest już książka o danym numerze ISBN
+
+> `404 - Category 'NAME' not found` gdy jedna z podanych kategorii nie istnieje
+
+
+### Zmiana danych książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`PUT` /api/book/{id}**  
+```json
+{
+  "title": "Nowy Tytuł Książki",
+  "isbn": "83-964925-9-X",
+  "author": "Nowy autor książki",
+  "description": "Nowy opis książki, może być długi",
+  "publisher": "Nowy Wydawca",
+  "publishYear": 2027,
+  "categoryNames": []
+}
+```
+
+> [!NOTE]  
+> Można (w przypadku ISBN nawet trzeba) wysłać tylko te pola które chce się zmienić
+
+**Zwraca:** *(dla id = 102)*
+```json
+{
+  "bookId": 102,
+  "title": "Nowy Tytuł Książki",
+  "isbn": "83-964925-9-X",
+  "author": "Nowy autor książki",
+  "description": "Nowy opis książki, może być długi",
+  "publisher": "Nowy Wydawca",
+  "publishYear": 2027,
+  "categoryNames": []
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Book by that id not found` gdy książka o podanym id nie istnieje
+
+> `400 - The ISBN number is not valid` gdy suma kontrolna numeru ISBN nie jest poprawna, system akceptuje 10 i 13-cyfrowe numery ISBN przedzielone myślnikami
+
+> `409 - Book with this ISBN already exists` gdy w bazie jest już książka o danym numerze ISBN
+
+> `404 - Category 'NAME' not found` gdy jedna z podanych kategorii nie istnieje
 
 
 ### Pobieranie listy książek (pełny opis)
@@ -254,7 +302,7 @@ Dostępne dla: `Brak ograniczeń`
   {
     "bookId": 1,
     "title": "Tytuł Książki",
-    "isbn": "123-45-6789-101-1",
+    "isbn": "83-8257-131-X",
     "author": "Autor książki",
     "description": "Opis książki, może być długi",
     "publisher": "Wydawca",
@@ -295,7 +343,7 @@ Dostępne dla: `Brak ograniczeń`
 {
   "bookId": 1,
   "title": "Tytuł Książki",
-  "isbn": "123-45-6789-101-1",
+  "isbn": "83-8257-131-X",
   "author": "Autor książki",
   "description": "Opis książki, może być długi",
   "publisher": "Wydawca",

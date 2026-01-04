@@ -134,10 +134,15 @@ public class Book {
         return this.categories.remove(category);
     }
 
+    public void removeAllCategories(){
+        this.categories = new HashSet<>();
+    }
+
     public List<BookCopy> getBookCopies() {
         return bookCopies;
     }
 
+    //Wszystko z dołu jest raczej do usunięcia
     public boolean addBookCopy(BookCopy bookCopy) {
         return this.bookCopies.add(bookCopy);
     }

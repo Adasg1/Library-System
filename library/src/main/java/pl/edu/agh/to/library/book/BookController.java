@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.to.library.book.dto.BookBriefResponse;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
 import pl.edu.agh.to.library.book.dto.BookFullResponse;
+import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
 
 import java.util.List;
 
@@ -27,6 +28,14 @@ public class BookController {
     public ResponseEntity<BookFullResponse> addBook(@RequestBody BookCreationRequest request){
         Book createdBook = bookService.createBook(request);
         return ResponseEntity.status(201).body(new BookFullResponse(createdBook));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<BookFullResponse> updateBook(@PathVariable int id, @RequestBody BookUpdateRequest request) {
+        Book updatedBook = bookService.updateBook(id,request);
+
+        return ResponseEntity.ok(new BookFullResponse(updatedBook));
     }
 
     @GetMapping("/full")
@@ -68,6 +77,12 @@ public class BookController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+
+    @ExceptionHandler(NullPointerException.class)
+    public ProblemDetail handleException(NullPointerException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
