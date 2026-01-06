@@ -2,13 +2,12 @@ package pl.edu.agh.to.library.book;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import pl.edu.agh.to.library.loan.Reservation;
+import pl.edu.agh.to.library.reservation.Reservation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name="Books")

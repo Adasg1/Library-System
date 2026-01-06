@@ -2,10 +2,12 @@ package pl.edu.agh.to.library.loan;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.edu.agh.to.library.book.Book;
 import pl.edu.agh.to.library.book.BookCopy;
 import pl.edu.agh.to.library.book.BookCopyService;
 import pl.edu.agh.to.library.book.BookStatus;
 import pl.edu.agh.to.library.loan.dto.LoanResponse;
+import pl.edu.agh.to.library.reservation.ReservationService;
 import pl.edu.agh.to.library.user.User;
 import pl.edu.agh.to.library.user.UserRepository;
 
@@ -18,11 +20,13 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
     private final BookCopyService bookCopyService;
+    private final ReservationService reservationService;
 
-    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookCopyService bookCopyService) {
+    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookCopyService bookCopyService, ReservationService reservationService) {
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookCopyService = bookCopyService;
+        this.reservationService = reservationService;
     }
 
     @Transactional
@@ -52,7 +56,8 @@ public class LoanService {
         loan.setStatus(LoanStatus.RETURNED);
         loan.setReturnDate(LocalDateTime.now());
 
-        bookCopyService.updateStatus(loan.getBookCopy().getBookCopyId(), BookStatus.AVAILABLE);
+        BookCopy copy = loan.getBookCopy();
+        reservationService.redistributeBookCopy(copy);
 
         return LoanResponse.from(loanRepository.save(loan));
     }

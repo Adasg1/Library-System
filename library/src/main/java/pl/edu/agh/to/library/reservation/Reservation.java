@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.loan;
+package pl.edu.agh.to.library.reservation;
 
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.book.Book;
@@ -29,11 +29,20 @@ public class Reservation {
     @JoinColumn(name = "bookId")
     private Book book;
 
-    public Reservation(User user, Book book, LocalDateTime reservationDate, ReservationStatus status){
+    @ManyToOne
+    @JoinColumn(name = "bookCopyId", nullable = false)
+    private BookCopy assignedCopy;
+
+    public Reservation(User user, Book book, LocalDateTime reservationDate){
         this.user = user;
         this.book = book;
         this.reservationDate = reservationDate;
-        this.status = status;
+        this.maxPickupDate = reservationDate.plusDays(4);
+        this.status = ReservationStatus.WAITING;
+    }
+
+    public Reservation() {
+
     }
 
     //region getters-setters
@@ -48,6 +57,10 @@ public class Reservation {
     public Book getBook() {
         return book;
     }
+
+    public BookCopy getAssignedCopy() {return assignedCopy;}
+
+    public void setAssignedCopy(BookCopy copy) {this.assignedCopy = copy;}
 
     public ReservationStatus getStatus() {
         return status;
