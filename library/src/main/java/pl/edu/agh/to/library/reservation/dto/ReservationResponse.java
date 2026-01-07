@@ -18,6 +18,7 @@ public record ReservationResponse(
                 reservation.getReservationDate(),
                 reservation.getMaxPickupDate(),
                 reservation.getStatus()
+                //reservation.getBook().getBookId()
         );
     }
 }

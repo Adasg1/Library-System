@@ -3,6 +3,7 @@ package pl.edu.agh.to.library.reservation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.*;
+import pl.edu.agh.to.library.reservation.dto.ReservationResponse;
 import pl.edu.agh.to.library.user.User;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,14 @@ public class ReservationService {
     public Reservation createReservation(User user, int bookId, LocalDateTime reservationDate){
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book with id " + bookId + " not found"));
+
+        var statuses = List.of(ReservationStatus.WAITING, ReservationStatus.READY);
+        Optional<Reservation> existingReservation = reservationRepository
+                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(user.getUserId(), bookId, statuses);
+
+        if (existingReservation.isPresent()) {
+            throw new IllegalStateException("User " + user.getUserId() + " already has an active reservation for book " + bookId);
+        }
 
         Reservation reservation = new Reservation(user, book, reservationDate);
 
@@ -64,8 +73,12 @@ public class ReservationService {
         return savedReservation;
     }
 
-    public List<Reservation> getUserReservations(int userId) {
-        return reservationRepository.findAllByUser_UserIdOrderByReservationDateDesc(userId);
+    public List<ReservationResponse> getUserReservations(int userId) {
+        return reservationRepository
+                .findAllByUser_UserIdOrderByReservationDateDesc(userId)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public List<Reservation> getReservations( ) {
@@ -85,6 +98,7 @@ public class ReservationService {
             reservation.setAssignedCopy(copy);
             bookCopyService.updateStatus(copy.getBookCopyId(), BookStatus.RESERVED);
             reservationRepository.save(reservation);
+            System.out.println("Sending email for book copy with id" + copy.getBookCopyId());
             // TODO Logika wysyłania powiadomień np. na email
         }
         else {
@@ -105,9 +119,63 @@ public class ReservationService {
             if (copy != null) {
                 redistributeBookCopy(copy);
             } else {
-                System.err.println("Błąd spójności danych: Rezerwacja " + reservation.getReservationId() + " o statusie READY bez przypisanej kopii!");
+                System.err.println("Error: Reservation " + reservation.getReservationId() + " with status READY without assigned book copy!");
             }
         }
         reservationRepository.saveAll(expiredReservations);
+    }
+
+    public void updateReservationAfterLoan(int userId, int bookId) {
+        var statuses = List.of(ReservationStatus.READY);
+        Optional<Reservation> userReservation = reservationRepository
+                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(userId, bookId, statuses);
+
+        userReservation.ifPresent(reservation -> {
+            reservation.setStatus(ReservationStatus.COMPLETED);
+            reservationRepository.save(reservation);
+        });
+    }
+
+    @Transactional
+    public BookCopy swapReservation(int userId, BookCopy copy) {
+        Reservation otherUserReservation = reservationRepository
+                .findByAssignedCopy_BookCopyIdAndStatus(copy.getBookCopyId(), ReservationStatus.READY)
+                .orElseThrow(() -> new IllegalStateException("Data inconsistency: Copy is RESERVED but no Reservation found!"));
+
+        if (otherUserReservation.getUser().getUserId() == userId) {
+            copy.setStatus(BookStatus.AVAILABLE);
+            return copy;
+        }
+
+        Optional<Reservation> optUserReservation = reservationRepository
+                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(userId, copy.getBook().getBookId(), List.of(ReservationStatus.READY));
+        if (optUserReservation.isPresent()) {
+            Reservation userReservation = optUserReservation.get();
+            BookCopy userCopy = userReservation.getAssignedCopy();
+            if (userCopy != null) {
+                userReservation.setAssignedCopy(copy);
+                otherUserReservation.setAssignedCopy(userCopy);
+
+                reservationRepository.save(userReservation);
+                reservationRepository.save(otherUserReservation);
+
+                copy.setStatus(BookStatus.AVAILABLE);
+                return copy;
+            }
+        }
+        Optional<BookCopy> replacementCopy = bookCopyRepository.findFirstByBook_BookIdAndStatus(copy.getBook().getBookId(), BookStatus.AVAILABLE);
+        if (replacementCopy.isPresent()) {
+            BookCopy availableCopy = replacementCopy.get();
+
+            otherUserReservation.setAssignedCopy(availableCopy);
+            bookCopyService.updateStatus(availableCopy.getBookCopyId(), BookStatus.RESERVED);
+
+            reservationRepository.save(otherUserReservation);
+
+            copy.setStatus(BookStatus.AVAILABLE);
+            return copy;
+        }
+
+        throw new IllegalStateException("This copy is reserved! No more available copies!");
     }
 }

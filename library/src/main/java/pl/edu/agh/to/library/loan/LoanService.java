@@ -2,12 +2,12 @@ package pl.edu.agh.to.library.loan;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.edu.agh.to.library.book.Book;
 import pl.edu.agh.to.library.book.BookCopy;
 import pl.edu.agh.to.library.book.BookCopyService;
 import pl.edu.agh.to.library.book.BookStatus;
 import pl.edu.agh.to.library.loan.dto.LoanResponse;
 import pl.edu.agh.to.library.reservation.ReservationService;
+import pl.edu.agh.to.library.reservation.ReservationStatus;
 import pl.edu.agh.to.library.user.User;
 import pl.edu.agh.to.library.user.UserRepository;
 
@@ -36,14 +36,18 @@ public class LoanService {
 
         BookCopy copy = bookCopyService.getCopyEntityById(copyId);
 
-        if (copy.getStatus() != BookStatus.AVAILABLE) {
-            throw new IllegalStateException("Book copy is not available for loan");
+        if (copy.getStatus() == BookStatus.RESERVED) {
+            copy = reservationService.swapReservation(userId, copy);
+        }
+        else if (copy.getStatus() != BookStatus.AVAILABLE){
+            throw new IllegalStateException("There is no book copy available");
         }
 
-        Loan loan = new Loan(user, copy, LocalDateTime.now(), LocalDateTime.now().plusMinutes(3)); //tutaj do zmiany na plusDays(x)
+        Loan loan = new Loan(user, copy, LocalDateTime.now(), LocalDateTime.now().plusDays(30));
         loan.setStatus(LoanStatus.ACTIVE);
 
         bookCopyService.updateStatus(copyId, BookStatus.LOANED);
+        reservationService.updateReservationAfterLoan(userId, copy.getBook().getBookId());
 
         return LoanResponse.from(loanRepository.save(loan));
     }
