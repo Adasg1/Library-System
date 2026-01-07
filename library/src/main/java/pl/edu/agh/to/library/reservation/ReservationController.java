@@ -8,6 +8,8 @@ import pl.edu.agh.to.library.reservation.dto.CreateReservationRequest;
 import pl.edu.agh.to.library.reservation.dto.ReservationResponse;
 import pl.edu.agh.to.library.user.User;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reservation")
 public class ReservationController {
@@ -19,7 +21,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("/")
+    @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReservationResponse> createReservation(
             @AuthenticationPrincipal User user,
@@ -33,11 +35,28 @@ public class ReservationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReservationResponse> cancelReservation(
             @AuthenticationPrincipal User user,
-            @PathVariable("reservationId") int reservationId
+            @PathVariable int reservationId
     ) {
         var reservation = reservationService.cancelReservation(
                 user.getUserId(), reservationId
         );
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
+
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<List<ReservationResponse>> getUserReservations(
+        @PathVariable int userId
+    ) {
+        return ResponseEntity.ok(reservationService.getUserReservations(userId));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ReservationResponse>> getMyReservations(
+        @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(reservationService.getUserReservations(user.getUserId()));
+    }
+
 }
