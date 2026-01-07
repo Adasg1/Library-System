@@ -51,6 +51,19 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getUserReservations(userId));
     }
 
+    @GetMapping("/book/{bookId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public ResponseEntity<List<ReservationResponse>> getBookReservations(
+            @PathVariable int bookId
+    ) {
+        var reservations = reservationService.getBookReservations(bookId);
+        return ResponseEntity.ok(
+                reservations.stream()
+                        .map(ReservationResponse::from)
+                        .toList()
+        );
+    }
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ReservationResponse>> getMyReservations(

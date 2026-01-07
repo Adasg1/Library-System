@@ -3,6 +3,7 @@ package pl.edu.agh.to.library.reservation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.*;
+import pl.edu.agh.to.library.notification.NotificationService;
 import pl.edu.agh.to.library.reservation.dto.ReservationResponse;
 import pl.edu.agh.to.library.user.User;
 
@@ -17,12 +18,14 @@ public class ReservationService {
     private final BookRepository bookRepository;
     private final BookCopyService bookCopyService;
     private final BookCopyRepository bookCopyRepository;
+    private final NotificationService notificationService;
 
-    public ReservationService(ReservationRepository reservationRepository, BookRepository bookRepository, BookCopyService bookCopyService, BookCopyRepository bookCopyRepository) {
+    public ReservationService(ReservationRepository reservationRepository, BookRepository bookRepository, BookCopyService bookCopyService, BookCopyRepository bookCopyRepository, NotificationService notificationService) {
         this.reservationRepository = reservationRepository;
         this.bookRepository = bookRepository;
         this.bookCopyService = bookCopyService;
         this.bookCopyRepository = bookCopyRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -48,6 +51,7 @@ public class ReservationService {
             reservation.setMaxPickupDate(LocalDateTime.now().plusDays(3));
             reservation.setAssignedCopy(copy);
             bookCopyService.updateStatus(copy.getBookCopyId(), BookStatus.RESERVED);
+            notificationService.sendBookAvailableNotification(user, book.getTitle());
         }
         return reservationRepository.save(reservation);
     }
@@ -81,6 +85,10 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<Reservation> getBookReservations(int bookId) {
+        return reservationRepository.findByBook_BookId(bookId);
+    }
+
     public List<Reservation> getReservations( ) {
         return reservationRepository.findAll();
     }
@@ -98,6 +106,7 @@ public class ReservationService {
             reservation.setAssignedCopy(copy);
             bookCopyService.updateStatus(copy.getBookCopyId(), BookStatus.RESERVED);
             reservationRepository.save(reservation);
+            notificationService.sendBookAvailableNotification(reservation.getUser(), copy.getBook().getTitle());
             System.out.println("Sending email for book copy with id" + copy.getBookCopyId());
             // TODO Logika wysyłania powiadomień np. na email
         }
