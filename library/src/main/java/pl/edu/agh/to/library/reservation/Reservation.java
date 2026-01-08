@@ -30,7 +30,7 @@ public class Reservation {
     private Book book;
 
     @ManyToOne
-    @JoinColumn(name = "bookCopyId")
+    @JoinColumn(name = "bookCopyId", nullable=true)
     private BookCopy assignedCopy;
 
     public Reservation(User user, Book book, LocalDateTime reservationDate){

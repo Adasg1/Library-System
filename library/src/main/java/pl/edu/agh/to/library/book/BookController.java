@@ -66,6 +66,12 @@ public class BookController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<BookBriefResponse>> getBooksByCategory(@PathVariable int categoryId) {
+        List<BookBriefResponse> books = bookService.getBooksByCategoryId(categoryId);
+        return ResponseEntity.ok(books);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteBook(@PathVariable int id) {

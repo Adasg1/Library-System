@@ -109,6 +109,14 @@ public class BookService {
         return bookRepository.findBookByIdWithAvailableCount(id);
     }
 
+    public List<BookBriefResponse> getBooksByCategoryId(int categoryId) {
+        if (categoryService.getCategoryById(categoryId).isEmpty()) {
+            throw new NullPointerException("Category by that id not found");
+        }
+
+        return bookRepository.findAllByCategoryId(categoryId);
+    }
+
     public boolean deleteBook(int id) {
         if (bookRepository.existsById(id)) {
             bookRepository.deleteById(id);

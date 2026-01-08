@@ -22,6 +22,11 @@ export const bookService = {
         return response.data;
     },
 
+    async getBooksByCategory(categoryId) {
+        const response = await api.get(`/book/category/${categoryId}`);
+        return response.data;
+    },
+
     // Dla Admina/Pracownika
 
     // Tworzenie książki

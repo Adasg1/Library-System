@@ -49,6 +49,10 @@ function Navbar() {
                     {user ? (
                         // Widok zalogowanego użytkownika
                         <>
+                            <Button component={Link} to="/profile" sx={{ color: '#ddd' }}>
+                                Mój Profil
+                            </Button>
+
                             <Typography sx={{ color: '#646cff', display: { xs: 'none', sm: 'block' }, mx: 2 }}>
                                 {user.email}
                                 {/* można dodać np. user.firstname, ale admin nie posiada, więc na razie do testów jest email */}

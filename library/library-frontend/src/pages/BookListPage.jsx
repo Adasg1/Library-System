@@ -23,7 +23,8 @@ const BookListPage = () => {
         try {
             let data;
             if (selectedCategory) {
-                data = await bookService.getAllBooksBrief(); // TODO pobieranie po kategorii
+                const categoryId = typeof selectedCategory === 'object' ? selectedCategory.categoryId : selectedCategory;
+                data = await bookService.getBooksByCategory(categoryId); // TODO pobieranie po kategorii
             } else {
                 data = await bookService.getAllBooksBrief();
             }

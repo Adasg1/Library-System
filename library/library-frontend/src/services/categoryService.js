@@ -12,6 +12,11 @@ export const categoryService = {
     },
 
     // Admin/Librarian
+    async addCategory(categoryData) {
+        const response = await api.post("/category/add", categoryData);
+        return response.data;
+    },
+
     async updateCategory(id, categoryData) {
         const response = await api.put(`/category/${id}`, categoryData);
         return response.data;
