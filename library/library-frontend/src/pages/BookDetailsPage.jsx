@@ -6,6 +6,8 @@ import { bookCopyService } from "../services/bookCopyService.js";
 import { userService } from "../services/userService.js";
 import { reservationService } from "../services/reservationService.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { ArrowBack, Edit, WarningAmber, Delete, AddCircleOutline } from '@mui/icons-material';
+import { toast } from "react-toastify";
 
 const BookDetailsPage = () => {
     const { id } = useParams();
@@ -13,7 +15,8 @@ const BookDetailsPage = () => {
 
     const [book, setBook] = useState(null);
     const [copies, setCopies] = useState([]);
-    const [message, setMessage] = useState("");
+
+    const [imgError, setImgError] = useState(false);
 
     const [users, setUsers] = useState([]);
     const [showRentModal, setShowRentModal] = useState(false);
@@ -29,8 +32,8 @@ const BookDetailsPage = () => {
                 setBook(data);
                 loadCopies(data.bookId);
             } catch (error) {
-                console.log(error);
-                setMessage("Nie udało się pobrać szczegółów książki.");
+                console.error("Błąd pobierania szczegółów.", error);
+                toast.error("Nie udało się pobrać szczegółów książki.");
             }
         };
         loadBookDetails();
@@ -42,7 +45,7 @@ const BookDetailsPage = () => {
             const copiesData = await bookCopyService.getCopiesByBookId(bookId);
             setCopies(copiesData);
         } catch (error) {
-            console.error("Błąd pobierania kopii:", error);
+            console.error("Błąd pobierania kopii.", error);
         }
     };
 
@@ -59,32 +62,32 @@ const BookDetailsPage = () => {
                 const usersData = await userService.getUsers();
                 setUsers(usersData);
             } catch (error) {
-                console.error("Błąd pobierania użytkowników", error);
-                setMessage("Nie udało sie pobrać listy użytkowników.");
+                console.error("Błąd pobierania użytkowników.", error);
+                toast.error("Nie udało się pobrać listy użytkowników");
             }
         }
     };
 
     const handleRentSubmit = async () => {
         if (!selectedUserId) {
-            alert("Wybierz użytkownika z listy!");
+            toast.warn("Wybierz użytkownika z listy!");
             return;
         }
         try{
             await loanService.rentBook(selectedUserId, selectedCopyForRent);
-            setMessage(`Sukces! Wypożyczono egzemplarz dla użytkownika ID: ${selectedUserId}`);
+            toast.success(`Sukces! Wypożyczono egzemplarz dla użytkownika ID: ${selectedUserId}`);
             setShowRentModal(false);
             loadCopies(book.bookId);
         } catch (error) {
             console.error(error);
-            setMessage("Błąd wypożyczania. Sprawdź czy użytkownik nie ma blokad.");
-            setShowRentModal(false);
+            toast.error("Błąd wypożyczania. Sprawdź czy użytkownik nie ma blokad.");            setShowRentModal(false);
         }
     };
 
+    // Obsługa rezerwacji książki
     const handleReserve = async () => {
         if (!user){
-            alert("Musisz być zalogowany, aby zarezerwować.");
+            toast.warn("Musisz być zalogowany, aby zarezerwować.");
             return;
         }
         try {
@@ -92,10 +95,10 @@ const BookDetailsPage = () => {
                 userId: user.id,
                 bookId: book.bookId
             });
-            setMessage("Sukces! Zarezerwowane książkę. Otrzymasz powiadomienie, gdy będzie dostępna do odbioru.");
+            toast.success("Sukces! Zarezerwowano książkę.");
         } catch (error) {
             console.error(error);
-            setMessage("Nie udało się zarezerwować książki.");
+            toast.error("Nie udało się zarezerwować książki.");
         }
     }
 
@@ -104,11 +107,11 @@ const BookDetailsPage = () => {
         if (!book) return;
         try {
             await bookCopyService.addCopy(book.bookId, "AVAILABLE");
-            setMessage("Dodano nowy egzemplarz!");
+            toast.success("Dodano nowy egzemplarz!");
             loadCopies(book.bookId);
             setTimeout(() => setMessage(""), 3000);
         } catch (error) {
-            setMessage("Błąd podczas dodawania egzemplarza.");
+            toast.error("Błąd podczas dodawania egzemplarza.");
         }
     };
 
@@ -118,44 +121,37 @@ const BookDetailsPage = () => {
         if(!window.confirm("Czy na pewno usunąć ten egzemplarz?")) return;
         try {
             await bookCopyService.deleteCopy(copyId);
-            setMessage("Usunięto egzemplarz.");
+            toast.info("Usunięto egzemplarz.");
             loadCopies(book.bookId);
         } catch (error) {
-            setMessage("Nie można usunąć egzemplarza (być może jest wypożyczony).");
-        }
-    };
-
-    // Kolory statusów (zielony - available, czerwony - loaned)
-    const getStatusStyle = (status) => {
-        switch (status) {
-            case 'AVAILABLE': return { color: '#4caf50', fontWeight: 'bold' };
-            case 'LOANED': return { color: '#f44336', fontWeight: 'bold' };
-            default: return { color: '#ffa726' };
+            toast.error("Nie można usunąć egzemplarza (być może jest wypożyczony).");
         }
     };
 
     if (!book){
-        return <div style={{ padding: '20px', textAlign: 'center' }}>Ładowanie szczegółów...</div>;
+        return <div className="p-8 text-center text-gray-500">Ładowanie szczegółów...</div>;
     }
 
     const availableCopiesCount = copies.filter(c => c.status === 'AVAILABLE').length;
     const showReserveButton = availableCopiesCount === 0 && !canEdit;
 
-    return (
-        <div className="card" style={{ maxWidth: '800px', margin: '20px auto', padding: '30px', textAlign: 'left' }}>
-            {showRentModal && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-                }}>
-                    <div style={{ backgroundColor: '#2a2a2a', padding: '30px', borderRadius: '8px', minWidth: '400px', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
-                        <h3 style={{ marginTop: 0 }}>Wypożycz egzemplarz #{selectedCopyForRent}</h3>
+    // URL okładki książki (jak w BookCopy)
+    const coverUrl = book.isbn
+        ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`
+        : null;
 
-                        <label style={{ display: 'block', marginBottom: '10px' }}>Wybierz czytelnika:</label>
+    return (
+        <div className="min-h-screen bg-gray-50 p-6 md:p-12">
+
+            {showRentModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md border-gray-100">
+                        <h3 className="text-xl font-bold mb-4 text-gray-800">Wypożycz egzemplarz #{selectedCopyForRent}</h3>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Wybierz czytelnika:</label>
                         <select
+                            className="w-full border border-gray-300 rounded-lg p-2.5 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
                             value={selectedUserId}
                             onChange={(e) => setSelectedUserId(e.target.value)}
-                            style={{ width: '100%', padding: '10px', marginBottom: '20px', fontSize: '1rem' }}
                         >
                             <option value="">-- Wybierz z listy --</option>
                             {users.map((u) => (
@@ -165,118 +161,185 @@ const BookDetailsPage = () => {
                             ))}
                         </select>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            <button onClick={() => setShowRentModal(false)} style={{ backgroundColor: '#555' }}>Anuluj</button>
-                            <button onClick={handleRentSubmit} style={{ backgroundColor: '#2196f3' }}>Zatwierdź</button>
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setShowRentModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Anuluj</button>
+                            <button onClick={handleRentSubmit} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">Zatwierdź</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {message && <div style={{ padding: '10px', background: '#e0f7fa', marginBottom: '20px', color: '#006064' }}>{message}</div>}
-
-            <h1 style={{ marginTop: 0, color: '#646cff' }}>{book.title}</h1>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                    <p><strong>Autor:</strong> {book.author}</p>
-                    <p><strong>ISBN:</strong> {book.isbn}</p>
-                    <p><strong>Wydawnictwo:</strong> {book.publisher}</p>
-                    <p><strong>Rok wydania:</strong> {book.publishYear}</p>
-                </div>
-                <div>
-                    <p><strong>Kategorie:</strong></p>
-                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {book.categoryNames && book.categoryNames.map((cat, index) => (
-                            <span key={index} style={{ background: '#444', padding: '2px 8px', borderRadius: '4px', fontSize: '0.9em' }}>
-                                {cat}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <hr style={{ borderColor: '#444', margin: '20px 0' }} />
-
-            <h3>Opis:</h3>
-            <p style={{ lineHeight: '1.6', color: '#ddd' }}>
-                {book.description || "Brak opisu dla tej pozycji."}
-            </p>
-
-            {showReserveButton && (
-                <div style={{ margin: '20px 0', padding: '15px', border: '1px solid #9c27b0', borderRadius: '8px', backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
-                    <h3 style={{ margin: '0 0 10px 0', color: '#ce93d8' }}>Brak dostępnych egzemplarzy</h3>
-                    <p style={{ fontSize: '0.9em', marginBottom: '15px' }}>
-                        Wszystkie egzemplarze są obecnie wypożyczone. Możesz zarezerwować tę książkę, aby otrzymać powiadomienie, gdy tylko wróci do biblioteki.
-                    </p>
-                    <button
-                        onClick={handleReserve}
-                        style={{ backgroundColor: '#9c27b0', color: 'white', border: 'none', padding: '10px 20px', fontSize: '1em', cursor: 'pointer' }}
-                    >
-                        Zarezerwuj
-                    </button>
-                </div>
-            )}
-
-            <div style={{ marginTop: '40px', background: '#2a2a2a', padding: '20px', borderRadius: '8px' }}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
-                    <h3 style={{margin: 0}}>Egzemplarze ({copies.length})</h3>
+            <div className="max-w-5xl mx-auto">
+                {/* --- Nagłówek i powrót --- */}
+                <div className="flex justify-between items-center mb-6">
+                    <Link to="/books" className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors font-medium">
+                        <ArrowBack fontSize="small" /> Wróć do listy
+                    </Link>
                     {canEdit && (
-                        <button onClick={handleAddCopy} style={{ backgroundColor: '#4caf50', fontSize: '0.9em' }}>
-                            + Dodaj Egzemplarz
-                        </button>
+                        <Link to={`/books/update/${book.bookId}`} className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-4 py-2 rounded-lg transition-colors border border-indigo-100">
+                            <Edit fontSize="small" /> Edytuj dane
+                        </Link>
                     )}
                 </div>
 
-                {copies.length === 0 ? (
-                    <p style={{color: '#888'}}>Brak egzemplarzy w systemie.</p>
-                ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95em' }}>
-                        <thead>
-                        <tr style={{ borderBottom: '1px solid #555', textAlign: 'left' }}>
-                            <th style={{ padding: '10px' }}>ID</th>
-                            <th style={{ padding: '10px' }}>Status</th>
-                            {canEdit && <th style={{ padding: '10px', textAlign: 'right' }}>Akcje</th>}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {copies.map((copy) => (
-                            <tr key={copy.id} style={{ borderBottom: '1px solid #333' }}>
-                                <td style={{ padding: '10px' }}>#{copy.id}</td>
-                                <td style={{ padding: '10px' }}>
-                                    <span style={getStatusStyle(copy.status)}>{copy.status}</span>
-                                </td>
-                                {canEdit && (
-                                    <td style={{ padding: '10px', textAlign: 'right' }}>
-                                            {copy.status === 'AVAILABLE' && (
-                                                <button onClick={() => openRentModal(copy.id)} style={{ marginRight: '10px', backgroundColor: '#2196f3', padding: '5px 10px', fontSize: '0.8em' }}>
-                                                    Wypożycz
-                                                </button>
-                                            )}
-                                            <button onClick={() => handleDeleteCopy(copy.id)} disabled={copy.status !== 'AVAILABLE'} style={{ backgroundColor: '#e53935', padding: '5px 10px', fontSize: '0.8em' }}>
-                                                Usuń
-                                            </button>
-                                    </td>
-                                )}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+                {/* --- GŁÓWNA KARTA KSIĄŻKI --- */}
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-8">
+                    <div className="p-8">
+                        <div className="flex flex-col md:flex-row gap-8">
 
-            <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
+                            {/* Lewa kolumna - okładka + dane */}
+                            <div className="md:w-1/3 flex flex-col gap-6">
+                                {/* Sekcja okładki */}
+                                <div className="w-full bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center min-h-[300px]">
+                                    {!imgError && coverUrl ? (
+                                        <img
+                                            src={coverUrl}
+                                            alt={`Okładka ${book.title}`}
+                                            className="max-h-100 w-auto object-contain shadow-lg rounded-md hover:scale-105 transition-transform duration-500"
+                                            onError={() => setImgError(true)}
+                                        />
+                                    ) : (
+                                        <div className="text-center p-6 text-gray-400">
+                                            <MenuBook style={{ fontSize: 64, marginBottom: '10px' }} />
+                                            <p className="text-sm font-medium">Brak okładki</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {/* Dane szczegółowe pod zdjęciem */}
+                                <div className="space-y-3 pt-2">
+                                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-2">{book.title}</h1>
+                                    <p><span className="font-semibold text-gray-400 uppercase text-xs tracking-wider">Autor:</span> <span className="text-gray-900 font-medium text-lg block">{book.author}</span></p>
+                                    <p><span className="font-semibold text-gray-400 uppercase text-xs tracking-wider">ISBN:</span> <span className="text-gray-900 font-medium text-lg block">{book.isbn}</span></p>
+                                    <p><span className="font-semibold text-gray-400 uppercase text-xs tracking-wider">Rok wydania:</span> <span className="text-gray-900 font-medium text-lg block">{book.publishYear}</span></p>
+                                    <p><span className="font-semibold text-gray-400 uppercase text-xs tracking-wider">Wydawnictwo:</span> <span className="text-gray-900 font-medium text-lg block">{book.publisher}</span></p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    {book.categoryNames?.map((cat, index) => (
+                                        <span key={index} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-full border border-gray-200">
+                                            {cat}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
 
-                {/* Edycja dla admina/bibliotekarza */}
-                {canEdit && (
-                    <Link to={`/books/update/${book.bookId}`}>
-                        <button style={{ backgroundColor: '#ff9800', color: 'black' }}>Edytuj dane</button>
-                    </Link>
-                )}
+                            {/* Prawa kolumna - opis */}
+                            <div className="flex-1 bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
+                                <h3 className="font-bold text-gray-800 mb-3 border-b border-gray-200 pb-2">Opis</h3>
+                                <p className="text-gray-600 leading-relaxed text-sm">
+                                    {book.description || "Brak opisu dla tej pozycji."}
+                                </p>
+                            </div>
+                        </div>
 
-                <Link to="/books">
-                    <button style={{ background: '#555' }}>Wróć do listy</button>
-                </Link>
+                        {/* Baner o rezerwacji */}
+                        {showReserveButton && (
+                            <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 text-amber-800">
+                                    <WarningAmber />
+                                    <div>
+                                        <p className="font-bold">Brak dostępnych egzemplarzy</p>
+                                        <p className="text-sm opacity-90">Możesz zarezerwować tę książkę, aby otrzymać powiadomienie.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleReserve}
+                                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition-all whitespace-nowrap"
+                                >
+                                    Zarezerwuj
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sekcja egzemplarzy */}
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50">
+                        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            Dostępne egzemplarze
+                            <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-xs text-gray-500">
+                                {copies.length}
+                            </span>
+                        </h3>
+                        {canEdit && (
+                            <button
+                                onClick={handleAddCopy}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm"
+                            >
+                                {/* POPRAWKA 4: Poprawiono fontsize -> fontSize */}
+                                <AddCircleOutline fontSize="small" /> Dodaj Egzemplarz
+                            </button>
+                        )}
+                    </div>
+
+                    {copies.length === 0 ? (
+                        <div className="p-12 text-center text-gray-400 border-dashed border-2 border-gray-50 m-6 rounded-xl">
+                            Brak egzemplarzy w systemie.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-white border-b border-gray-100">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ID Egzemplarza</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                                    {canEdit && <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Akcje</th>}
+                                </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                {copies.map((copy) => (
+                                    <tr key={copy.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 font-medium text-gray-600">
+                                            #{copy.id}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                                                copy.status === 'AVAILABLE'
+                                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                                    : copy.status === 'LOANED'
+                                                        ? 'bg-red-50 text-red-700 border-red-100'
+                                                        : 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                            }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                                    copy.status === 'AVAILABLE' ? 'bg-green-500' :
+                                                        copy.status === 'LOANED' ? 'bg-red-500' : 'bg-yellow-500'
+                                                }`}></span>
+                                                {copy.status}
+                                            </span>
+                                        </td>
+                                        {canEdit && (
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    {copy.status === 'AVAILABLE' && (
+                                                        <button
+                                                            onClick={() => openRentModal(copy.id)}
+                                                            className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-bold transition-colors"
+                                                        >
+                                                            Wypożycz
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteCopy(copy.id)}
+                                                        disabled={copy.status !== 'AVAILABLE'}
+                                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${
+                                                            copy.status !== 'AVAILABLE'
+                                                                ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                                                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                        }`}
+                                                        title={copy.status !== 'AVAILABLE' ? "Nie można usunąć wypożyczonego egzemplarza" : "Usuń"}
+                                                    >
+                                                        <Delete fontSize="small" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
