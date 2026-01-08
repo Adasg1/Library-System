@@ -11,33 +11,96 @@
 ![UML](./Library-UML.png)
 
 ### User
+* `int` userId  
+* `String` firstName
+* `String` lastName
+* `String` email
+* `String` password
+* `Role` role  
+* `List<Loan>` loans
+* `List<Reservation>` reservations
+
 Klasa przedstawiająca użytkowników biblioteki, w tym bibliotekarzy i adminów
 
 ### Role
+* `ADMIN`
+* `LIBRARIAN`
+* `READER`
+
 Enumerator dostępnych ról użytkowników
 
 ### Category
+* `int` categoryId
+* `String` categoryName
+* `List<Book>` books
+
 Przedstawia kategorie, rodzaje i gatunki książek dostępnych w bibliotece
 
 ### Book
+* `int` bookId  
+* `String` title
+* `String` isbn
+* `String` author
+* `String` description
+* `String` publisher
+* `int` publishYear
+* `Set<Category>` categories
+* `List<BookCopy>` bookCopies
+* `List<Reservation>` reservations
+
 Przedstawia książki dostępne w bibliotece, ich tytuły, autorów oraz inne informacje istotne dla czytelników
 
 ### BookCopy
+* `int` bookCopyId
+* `Book` book
+* `BookStatus` status
+
 Przedstawia indywidualne egzemplarze książek, które biblioteka ma w magazynie oraz ich stan
 
 ### BookStatus
+* `AVAILABLE`
+* `DAMAGED`
+* `LOST`
+* `LOANED`
+* `RESERVED`
+
 Enumerator - stan egzemplarza książki
 
 ### Loan
+* `int` loanId
+* `User` user
+* `BookCopy` bookCopy
+* `LoanStatus` status
+* `LocalDateTime` rentalDate
+* `LocalDateTime` dueDate
+* `LocalDateTime` returnDate
+
 Klasa przedstawia pożyczkę książki przez danego użytkownika, jej daty pożyczenia oraz oddania jak również jej status. Historia wypożyczeń jest przechowywana do celów archiwalnych
 
 ### LoanStatus
+* `ACTIVE`
+* `RETURNED`
+* `OVERDUE`
+
 Enumerator - status pożyczki
 
 ### Reservation
+* `int` reservationId
+* `LocalDateTime` reservationDate
+* `LocalDateTime` maxPickupDate
+* `ReservationStatus` status
+* `User` user
+* `Book` book
+* `BookCopy` assignedCopy
+
 Przedstawia rezerwacje książek. Rezerwacje mogą być użyte gdy użytkownik chce pożyczyć książki które na ten moment nie są dostępne
 
 ### ReservationStatus
+* `WAITING`
+* `READY`
+* `COMPLETED`
+* `CANCELED`
+
 Enumerator - status rezerwacji
 
 
