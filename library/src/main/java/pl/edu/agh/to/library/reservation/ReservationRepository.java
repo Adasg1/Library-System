@@ -27,4 +27,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     Optional<Reservation> findByAssignedCopy_BookCopyIdAndStatus(int bookCopyId, ReservationStatus status);
 
     Reservation user(User user);
+
+    List<Reservation> findByBook_BookId(Integer bookId);
 }
