@@ -1,6 +1,7 @@
 package pl.edu.agh.to.library.book;
 
 import org.springframework.stereotype.Service;
+import pl.edu.agh.to.library.book.dto.BookBriefResponse;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
 import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
 
@@ -92,11 +93,20 @@ public class BookService {
 
 
     public List<Book> getAllBooks(){
+
         return bookRepository.findAll();
+    }
+
+    public List<BookBriefResponse> getAllBookBriefs() {
+        return bookRepository.findAllBooksWithAvailableCount();
     }
 
     public Optional<Book> getBookById(int id){
         return bookRepository.findById(id);
+    }
+
+    public Optional<BookBriefResponse> getBookBriefById(int id){
+        return bookRepository.findBookByIdWithAvailableCount(id);
     }
 
     public boolean deleteBook(int id) {
@@ -109,10 +119,10 @@ public class BookService {
 
 
     private boolean isIsbnValid(String isbn){
-        if (isbn.length() != 13 && isbn.length() != 17)
-            return false;
+        if (isbn == null) return false;
 
-        String numbers = isbn.replaceAll("-","");
+        String numbers = isbn.replaceAll("-", "").replaceAll(" ", "");
+
         try {
             if (numbers.length() == 10) {
                 //From https://en.wikipedia.org/wiki/ISBN

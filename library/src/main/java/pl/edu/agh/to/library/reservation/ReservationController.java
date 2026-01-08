@@ -27,7 +27,7 @@ public class ReservationController {
             @AuthenticationPrincipal User user,
             @RequestBody CreateReservationRequest request
     ) {
-        var reservation = reservationService.createReservation(user, request.bookId(), request.date());
+        var reservation = reservationService.createReservation(user, request.bookId());
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
 

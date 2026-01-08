@@ -29,7 +29,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createReservation(User user, int bookId, LocalDateTime reservationDate){
+    public Reservation createReservation(User user, int bookId){
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book with id " + bookId + " not found"));
 
@@ -41,7 +41,7 @@ public class ReservationService {
             throw new IllegalStateException("User " + user.getUserId() + " already has an active reservation for book " + bookId);
         }
 
-        Reservation reservation = new Reservation(user, book, reservationDate);
+        Reservation reservation = new Reservation(user, book, LocalDateTime.now());
 
         Optional<BookCopy> availableCopy = bookCopyRepository.findFirstByBook_BookIdAndStatus(bookId, BookStatus.AVAILABLE);
 

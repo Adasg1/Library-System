@@ -1,100 +1,151 @@
 import React, { useEffect, useState } from 'react';
 import { bookService } from "../services/bookService.js";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
+import CategoriesSideBar from "../components/CategoriesSideBar.jsx";
+import BookCard from "../components/BookCard.jsx";
+import {reservationService} from "../services/reservationService.js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const BookListPage = () => {
     const [books, setBooks] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const { user } = useAuth();
-    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadBooks();
-    }, []);
+    }, [selectedCategory]);
 
     const loadBooks = async () => {
+        setLoading(true);
         try {
-            // Ładuje tylko część informacji o książkach (brief)
-            // Szczegóły są dostępne po kliknięciu w daną książkę
-            const data = await bookService.getAllBooksBrief();
+            let data;
+            if (selectedCategory) {
+                data = await bookService.getAllBooksBrief(); // TODO pobieranie po kategorii
+            } else {
+                data = await bookService.getAllBooksBrief();
+            }
+            console.log("Pobrane książki:", data);
             setBooks(data);
         } catch (error) {
-            console.log(error);
+            console.error("Błąd pobierania książek:", error);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const handleReservation = async (book) => {
+        if (window.confirm(`Czy na pewno chcesz zarezerwować książkę: ${book.title}`)) {
+            try {
+                const reservation = await reservationService.createReservation({bookId: book.bookId})
+                if (reservation.status === "READY") {
+                    const formattedDate = new Date(reservation.maxPickupDate).toLocaleString('pl-PL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    toast.success(
+                        <div>
+                            <p className="font-bold">📚 Zarezerwowano: "{book.title}"</p>
+                            <p className="text-sm">Czas na odbiór do: <strong>{formattedDate}</strong></p>
+                        </div>,
+                        { position: "top-right", autoClose: 5000 }
+                    );
+                } else if (reservation.status === "WAITING") {
+                    toast.success(`📚 Zarezerwowano: "${book.title}"! Powiadomimy cie mailowo, gdy tytuł będzie dostępny`, {
+                        position: "top-right",
+                        autoClose: 5000,
+                    });
+                }
+
+            } catch (e) {
+                console.log(e);
+                toast.error(`📚 Rezerwacja "${book.title}"  nie powiodła się!`, {
+                    position: "top-right",
+                    autoClose: 5000,
+                });
+            }
+        }
+    }
 
     const handleDelete = async (id) => {
         if (window.confirm("Czy na pewno chcesz usunąć tę książkę?")) {
             try {
                 await bookService.deleteBook(id);
-                loadBooks();
+                setBooks(prevBooks => prevBooks.filter(book => book.bookId !== id));
             } catch (error) {
-                console.log(error);
+                console.error("Błąd usuwania:", error);
             }
         }
     };
 
-    // const handleBorrow = async (id) => {
-    //     // na przyszłość do wypożyczania książek
-    // }
-
-    // uprawnienia
     const canAdd = user?.role === 'ADMIN' || user?.role === 'LIBRARIAN';
-    const canDelete = user?.role === 'ADMIN';
 
     return (
-        <div className="bookListPage" style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-            <h1>Katalog Książek</h1>
-            {message && <div style={{ padding: '10px', background: '#e0f7fa', marginBottom: '20px', color: '#006064' }}>{message}</div>}
+        <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+            <ToastContainer />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-                {books.map((book) => (
-                    <div key={book.bookId} className="card" style={{
-                        border: '1px solid #444',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        textAlign: 'left',
-                        backgroundColor: '#2a2a2a',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                    }}>
-                        <div>
-                            <Link to={`/books/details/${book.bookId}`} style={{ textDecoration: 'none' }}>
-                                <h3 style={{ marginTop: 0, color: '#646cff', cursor: 'pointer' }}>{book.title}</h3>
-                            </Link>
-
-                            <p style={{ margin: '5px 0', color: '#ccc' }}><strong>Autor:</strong> {book.author}</p>
-                        </div>
-
-                        <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            <Link to={`/books/details/${book.bookId}`} style={{ flex: 1 }}>
-                                <button style={{ width: '100%', backgroundColor: '#646cff' }}>Szczegóły</button>
-                            </Link>
-
-                            {/* Opcje administracyjne */}
-                            {canAdd && (
-                                <Link to={`/books/update/${book.bookId}`} style={{ textDecoration: 'none', display: 'flex'}}>
-                                    <button style={{ fontSize: '0.8em', padding: '5px 10px' }}>Edytuj</button>
-                                </Link>
-                            )}
-
-                            {canDelete && (
-                                <button onClick={() => handleDelete(book.bookId)} style={{ backgroundColor: '#d32f2f', fontSize: '0.8em', padding: '5px 10px' }}>Usuń</button>
-                            )}
-                        </div>
-                    </div>
-                ))}
+            {/* --- SIDEBAR --- */}
+            <div className="w-full md:w-64 bg-white border-r border-gray-200 md:min-h-screen shrink-0">
+                <div className="p-4 md:fixed md:w-64 md:h-full md:overflow-y-auto">
+                    <CategoriesSideBar
+                        onSelectCategory={(category) => setSelectedCategory(category)}
+                        selectedCategory={selectedCategory}
+                    />
+                </div>
             </div>
 
-            {canAdd && (
-                <div style={{ marginBottom: '20px', marginTop: '20px' }}>
-                    <Link to="/books/new">
-                        <button style={{ backgroundColor: '#4CAF50' }}>Dodaj książkę</button>
-                    </Link>
-                </div>
-            )}
+            {/* --- GŁÓWNA ZAWARTOŚĆ --- */}
+            <div className="flex-1 p-6 md:p-8">
+                <div className="max-w-7xl mx-auto">
 
+                    {/* Nagłówek + Przycisk dodawania */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                        <h1 className="text-3xl font-bold text-gray-800">
+                            {selectedCategory ? 'Książki z kategorii: ' + selectedCategory.categoryName : 'Katalog Książek'}
+                        </h1>
+
+                        {canAdd && (
+                            <Link to="/books/new">
+                                <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all flex items-center gap-2">
+                                    <span>+ Dodaj Książkę</span>
+                                </button>
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Loader */}
+                    {loading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        </div>
+                    ) : (
+                        /* Grid Książek */
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {books.length > 0 ? (
+                                books.map((book) => (
+                                    <BookCard
+                                        key={book.bookId}
+                                        book={book}
+                                        user={user}
+                                        onReservation={handleReservation}
+                                        onDelete={handleDelete}
+                                    />
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-12 text-gray-500">
+                                    Brak książek w tej kategorii.
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

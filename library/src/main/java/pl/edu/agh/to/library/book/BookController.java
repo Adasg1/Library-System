@@ -55,14 +55,13 @@ public class BookController {
     @GetMapping("/brief")
     public ResponseEntity<List<BookBriefResponse>> getAllBooksBrief() {
         return ResponseEntity.ok(
-                bookService.getAllBooks().stream().map(BookBriefResponse::new).toList()
+                bookService.getAllBookBriefs()
         );
     }
 
     @GetMapping("/brief/{id}")
     public ResponseEntity<BookBriefResponse> getBookByIdBrief(@PathVariable int id) {
-        return bookService.getBookById(id)
-                .map(BookBriefResponse::new)
+        return bookService.getBookBriefById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
