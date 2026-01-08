@@ -17,5 +17,11 @@ export const loanService = {
     async getUserLoans(userId) {
         const response = await api.get(`/loan/user/${userId}`);
         return response.data;
+    },
+
+    // Pobieranie wypożyczeń użytkownika (nie jako admin)
+    async getMyLoans() {
+        const response = await api.get("/loan/me");
+        return response.data;
     }
 };

@@ -9,7 +9,8 @@ public record ReservationResponse(
         Integer reservationId,
         LocalDateTime reservationDate,
         LocalDateTime maxPickupDate,
-        ReservationStatus status
+        ReservationStatus status,
+        String bookTitle
 
 ) {
     public static ReservationResponse from(Reservation reservation) {
@@ -17,8 +18,8 @@ public record ReservationResponse(
                 reservation.getReservationId(),
                 reservation.getReservationDate(),
                 reservation.getMaxPickupDate(),
-                reservation.getStatus()
-                //reservation.getBook().getBookId()
+                reservation.getStatus(),
+                reservation.getBook().getTitle()
         );
     }
 }

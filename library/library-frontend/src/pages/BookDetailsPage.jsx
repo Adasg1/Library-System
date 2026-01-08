@@ -4,6 +4,7 @@ import { bookService } from "../services/bookService.js";
 import { loanService } from "../services/loanService.js";
 import { bookCopyService } from "../services/bookCopyService.js";
 import { userService } from "../services/userService.js";
+import { reservationService } from "../services/reservationService.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const BookDetailsPage = () => {
@@ -51,6 +52,8 @@ const BookDetailsPage = () => {
         setSelectedUserId("");
 
         // pobieram listę użytkowników
+        // jednak tu wybieranie użytkownika przez wyszukiwanie po nazwisku będzie lepsze w przypadku np. 5000 użytkowników
+        // do poprawy
         if (users.length === 0){
             try{
                 const usersData = await userService.getUsers();
@@ -78,6 +81,23 @@ const BookDetailsPage = () => {
             setShowRentModal(false);
         }
     };
+
+    const handleReserve = async () => {
+        if (!user){
+            alert("Musisz być zalogowany, aby zarezerwować.");
+            return;
+        }
+        try {
+            await reservationService.createReservation({
+                userId: user.id,
+                bookId: book.bookId
+            });
+            setMessage("Sukces! Zarezerwowane książkę. Otrzymasz powiadomienie, gdy będzie dostępna do odbioru.");
+        } catch (error) {
+            console.error(error);
+            setMessage("Nie udało się zarezerwować książki.");
+        }
+    }
 
     // Obsługa dodawania nowej kopii
     const handleAddCopy = async () => {
@@ -117,6 +137,9 @@ const BookDetailsPage = () => {
     if (!book){
         return <div style={{ padding: '20px', textAlign: 'center' }}>Ładowanie szczegółów...</div>;
     }
+
+    const availableCopiesCount = copies.filter(c => c.status === 'AVAILABLE').length;
+    const showReserveButton = availableCopiesCount === 0 && !canEdit;
 
     return (
         <div className="card" style={{ maxWidth: '800px', margin: '20px auto', padding: '30px', textAlign: 'left' }}>
@@ -180,6 +203,21 @@ const BookDetailsPage = () => {
                 {book.description || "Brak opisu dla tej pozycji."}
             </p>
 
+            {showReserveButton && (
+                <div style={{ margin: '20px 0', padding: '15px', border: '1px solid #9c27b0', borderRadius: '8px', backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
+                    <h3 style={{ margin: '0 0 10px 0', color: '#ce93d8' }}>Brak dostępnych egzemplarzy</h3>
+                    <p style={{ fontSize: '0.9em', marginBottom: '15px' }}>
+                        Wszystkie egzemplarze są obecnie wypożyczone. Możesz zarezerwować tę książkę, aby otrzymać powiadomienie, gdy tylko wróci do biblioteki.
+                    </p>
+                    <button
+                        onClick={handleReserve}
+                        style={{ backgroundColor: '#9c27b0', color: 'white', border: 'none', padding: '10px 20px', fontSize: '1em', cursor: 'pointer' }}
+                    >
+                        Zarezerwuj
+                    </button>
+                </div>
+            )}
+
             <div style={{ marginTop: '40px', background: '#2a2a2a', padding: '20px', borderRadius: '8px' }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
                     <h3 style={{margin: 0}}>Egzemplarze ({copies.length})</h3>
@@ -215,7 +253,7 @@ const BookDetailsPage = () => {
                                                     Wypożycz
                                                 </button>
                                             )}
-                                            <button onClick={() => handleDeleteCopy(copy.id)} style={{ backgroundColor: '#e53935', padding: '5px 10px', fontSize: '0.8em' }}>
+                                            <button onClick={() => handleDeleteCopy(copy.id)} disabled={copy.status !== 'AVAILABLE'} style={{ backgroundColor: '#e53935', padding: '5px 10px', fontSize: '0.8em' }}>
                                                 Usuń
                                             </button>
                                     </td>

@@ -32,10 +32,20 @@ const HomePage = () => {
 
                         {/* Kafelki ADMINA i Bibliotekarza */}
                         {isStaff && (
-                            <Link to="/books/new" className="admin-tile">
-                                <h3>Dodaj Książkę</h3>
-                                <p>Wprowadź nową pozycję do systemu.</p>
-                            </Link>
+                            <>
+                                <Link to="/books/new" className="admin-tile">
+                                    <h3>Dodaj Książkę</h3>
+                                    <p>Wprowadź nową pozycję do systemu.</p>
+                                </Link>
+
+                                {/* Przycisk widoczny tylko dla Admina */}
+                                {user?.role === 'ADMIN' && (
+                                    <Link to="/admin/users" className="admin-tile" style={{ backgroundColor: '#d32f2f' }}>
+                                        <h3>Użytkownicy</h3>
+                                        <p>Zarządzaj rolami i kontami.</p>
+                                    </Link>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

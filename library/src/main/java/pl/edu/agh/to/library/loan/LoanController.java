@@ -2,8 +2,10 @@ package pl.edu.agh.to.library.loan;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.to.library.loan.dto.LoanResponse;
+import pl.edu.agh.to.library.user.User;
 
 import java.util.List;
 
@@ -45,5 +47,11 @@ public class LoanController {
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<List<LoanResponse>> getLoansByUser(@PathVariable int userId) {
         return ResponseEntity.ok(loanService.getLoansByUser(userId));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<LoanResponse>> getMyLoans(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(loanService.getLoansByUser(user.getUserId()));
     }
 }

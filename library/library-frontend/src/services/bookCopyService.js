@@ -14,7 +14,7 @@ export const bookCopyService = {
     },
 
     // Usuwanie kopii książki
-    async deleteBook(copyId) {
+    async deleteCopy(copyId) {
         await api.delete(`/bookcopy/${copyId}`);
     }
 };

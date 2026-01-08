@@ -10,6 +10,7 @@ import Navbar from "./components/Navbar.jsx";
 import BookListPage from "./pages/BookListPage.jsx";
 import BookFormPage from "./pages/BookFormPage.jsx";
 import BookDetailsPage from "./pages/BookDetailsPage.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
 
 function App() {
     return (
@@ -36,6 +37,9 @@ function App() {
 
                     {/* Widok profilu - dostępny dla każdego zalogowanego*/}
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+                    {/* Panel Admina   */}
+                    <Route path="/admin/users" element={<ProtectedRoute requiredRoles={['ADMIN']}><AdminPage /></ProtectedRoute>} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>
