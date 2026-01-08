@@ -40,51 +40,193 @@ Przedstawia rezerwacje książek. Rezerwacje mogą być użyte gdy użytkownik 
 ### ReservationStatus
 Enumerator - status rezerwacji
 
+
+
 ## Operacje CRUD dla użytkownika
+
 
 ### Dodawanie nowego użytkownika
 
-<img width="2771" height="1208" alt="image" src="https://github.com/user-attachments/assets/276a3497-9cc2-4b1b-92c0-b160a5ee898b" />
+Dostępne dla: `ADMIN`
 
-<img width="2773" height="665" alt="image" src="https://github.com/user-attachments/assets/5decf3f4-d3dd-4c0a-b3be-99b666488f1c" />
+**`POST` /api/user/add**  
+```json
+{
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@gmail.com",
+    "password": "hasło",
+    "role": "LIBRARIAN"
+}
+```
+
+**Zwraca:**
+```json
+{
+  "id": 2,
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "email": "jan.kowalski@gmail.com",
+  "role": "LIBRARIAN"
+}
+```
+
+**Możliwe błędy:**
+
+//TODO
+> `403 - Forbidden` gdy istnieje już użytkownik o podanym adresie email  
+
 
 ### Pobieranie listy użytkowników
 
-<img width="3514" height="574" alt="image" src="https://github.com/user-attachments/assets/b6673280-f0a4-49da-907d-0955b20f96d0" />
+Dostępne dla: `ADMIN`, `LIBRARIAN`
 
-<img width="3404" height="1239" alt="image" src="https://github.com/user-attachments/assets/63b5df40-f9d2-48ab-a498-54deadfde228" />
+**`GET` /api/user**  
+
+**Zwraca:**
+```json
+[
+  {
+    "id": 2,
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@gmail.com",
+    "role": "LIBRARIAN"
+  },
+  {
+    "id": 3,
+    "firstName": "Grzegorz",
+    "lastName": "Brzęczyszczykiewicz",
+    "email": "grzegorz1997@gmail.com",
+    "role": "READER"
+  }
+]
+```
+
 
 ### Pobieranie pojedynczego użytkownika
 
-<img width="3504" height="805" alt="image" src="https://github.com/user-attachments/assets/ecf3a3ab-41bd-461c-b51c-f95daa253f65" />
+Dostępne dla: `ADMIN`, `LIBRARIAN`
 
-<img width="3434" height="858" alt="image" src="https://github.com/user-attachments/assets/6480de8b-c819-4594-bc32-81f6fc11aa57" />
+**`GET` /api/user/{id}**  
+
+
+**Zwraca:** *(tu dla id=3)*
+```json
+{
+  "id": 3,
+  "firstName": "Grzegorz",
+  "lastName": "Brzęczyszczykiewicz",
+  "email": "grzegorz1997@gmail.com",
+  "role": "READER"
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy nie istnieje użytkownik o podanym id
 
 ### Edytowanie danych uzytkownika
 
-<img width="2772" height="1405" alt="image" src="https://github.com/user-attachments/assets/ba66e299-f1c5-41d7-90e4-c83c0fd3c93d" />
+Dostępne dla: `ADMIN`
 
-<img width="2760" height="658" alt="image" src="https://github.com/user-attachments/assets/3f0f2352-8e62-4e27-9bff-1bd8da7c7f86" />
+**`PUT` /api/user/{id}**  
+```json
+{
+    "firstName": "Janusz",
+    "lastName": "Nowak",
+    "email": "nowak.janusz@wp.pl",
+    "password": "nowe hasło",
+    "role": "READER"
+}
+```
+
+> [!NOTE]  
+> Można wysłać tylko te pola które chce się zmienić
+
+**Zwraca:** *(tu dla id=2)*
+```json
+{
+  "id": 2,
+  "firstName": "Janusz",
+  "lastName": "Nowak",
+  "email": "nowak.janusz@wp.pl",
+  "role": "READER"
+}
+```
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy nie istnieje użytkownik o podanym id  
+
+//TODO  
+> `403 - Forbidden` gdy istnieje już użytkownik o podanym adresie email  
 
 ### Usuwanie użytkownika
 
-<img width="2767" height="649" alt="image" src="https://github.com/user-attachments/assets/04a60218-1328-43dd-ac69-0009d8957f2f" />
+Dostępne dla: `ADMIN`
 
-<img width="2756" height="171" alt="image" src="https://github.com/user-attachments/assets/783e2b1e-a60d-403a-a306-2aa820c25073" />
+**`DELETE` /api/user/{id}**  
+
+**Możliwe błędy:**
+
+> `404 - Not Found` gdy użytkownik o podanym id nie istnieje
 
 ### Rejestracja użytkownika
 
-<img width="2761" height="1189" alt="image" src="https://github.com/user-attachments/assets/38ff5305-11a9-48f7-87f4-6b1605af01aa" />
+Dostępne dla: `Brak ograniczeń`
 
-<img width="2767" height="417" alt="image" src="https://github.com/user-attachments/assets/deeb7e97-2c97-4bbe-8387-2c779f2053b6" />
+**`POST` /api/auth/register**  
+```json
+{
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "email": "jan.kowalski@gmail.com",
+    "password": "hasło masło"
+}
+```
+
+**Zwraca:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUkVBREVSIiwiaWQiOjcsInN1YiI6Imphbi5rb3dhbHNraUBnbWFpbC5jb20iLCJpYXQiOjE3Njc4NzUwMTQsImV4cCI6MTc2Nzk2MTQxNH0.MsAqyA-1h6DkTLQhKIyBpeu4hU4g7TZYdjw1FU9XT60",
+  "email": "jan.kowalski@gmail.com",
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "role": "READER"
+}
+```
+
+**Możliwe błędy:**
+
+//TODO
 
 ### Logowanie użytkownika
 
-<img width="2774" height="1211" alt="image" src="https://github.com/user-attachments/assets/48e0b983-5e7f-4fdd-86ce-2cd6899a3d28" />
+Dostępne dla: `Brak ograniczeń`
 
-<img width="2760" height="410" alt="image" src="https://github.com/user-attachments/assets/edf2cc41-0662-46ec-a1b7-3cd06b2aa534" />
+**`POST` /api/auth/login**  
+```json
+{
+    "email": "jan.kowalski@gmail.com",
+    "password": "hasło masło"
+}
+```
 
+**Zwraca:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUkVBREVSIiwiaWQiOjcsInN1YiI6Imphbi5rb3dhbHNraUBnbWFpbC5jb20iLCJpYXQiOjE3Njc4NzUwMTQsImV4cCI6MTc2Nzk2MTQxNH0.MsAqyA-1h6DkTLQhKIyBpeu4hU4g7TZYdjw1FU9XT60",
+  "email": "jan.kowalski@gmail.com",
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "role": "READER"
+}
+```
 
+**Możliwe błędy:**
+
+//TODO
 
 
 ## Operacje CRUD dla książek
