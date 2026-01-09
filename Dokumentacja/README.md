@@ -1,4 +1,15 @@
-# Dokumentacja Library-System
+# 📚 Mole Książkowe – System Obsługi Biblioteki
+
+Projekt realizowany w ramach przedmiotu **Technologie Obiektowe**.
+
+Celem projektu jest stworzenie kompletnego systemu bibliotecznego obsługującego proces wypożyczania książek, zarządzania czytelnikami oraz księgozbiorem.
+
+### 🎯 Główne założenia i funkcjonalności:
+* **Wielorolowość:** Obsługa różnych uprawnień dla ról: Czytelnik, Bibliotekarz, Administrator.
+* **Zarządzanie księgozbiorem (CRUD):** Dodawanie, edycja i usuwanie książek oraz egzemplarzy.
+* **Kategoryzacja:** Możliwość przypisywania książek do wielu kategorii jednocześnie (relacja wiele-do-wielu).
+* **Proces wypożyczania:** System obsługuje rezerwacje (kolejkowanie), wypożyczenia oraz zwroty książek.
+* **Walidacja i Bezpieczeństwo:** Rejestracja użytkowników z walidacją danych oraz autoryzacja dostępu do zasobów.
 
 ## Użyte Technologie
 * Java 25
