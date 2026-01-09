@@ -1,8 +1,39 @@
 # Dokumentacja Library-System
 
 ## Użyte Technologie
-* Java
-* Spring
+* Java 25
+* Spring Boot
+* Gradle
+* React
+* Axios
+* Postgres
+* Docker
+* Docker Compose
+
+## Infrastruktura i Baza Danych
+Aplikacja wykorzystuje bazę danych PostgreSQL do trwałego przechowywania danych. Całe środowisko bazodanowe jest w pełni kontenerowe:
+
+Docker: Służy do izolacji bazy danych od systemu operacyjnego.
+
+Docker Compose: Zarządza kontenerem bazy danych, definiując zmienne środowiskowe (hasła, użytkowników), porty oraz wolumeny (persystencja danych po restarcie kontenera).
+
+Integracja: Spring Boot łączy się z bazą za pomocą sterownika JDBC, korzystając z konfiguracji zawartej w pliku application.properties / yml.
+
+## Architektura i wzorce projektowe
+Domain-Driven Design (DDD): Projekt wykorzystuje podejście Domain-Driven Design (DDD). System jest podzielony na logiczne domeny (User, Book, Loan, Reservation), z których każda stanowi spójny moduł.
+
+Separacja warstw: Aplikacja podzielona jest na warstwy: Controller (API), Service (Logika biznesowa) oraz Repository (Dostęp do danych).
+
+DTO (Data Transfer Objects): System wykorzystuje wzorzec DTO do komunikacji z frontendem. Dzięki temu encje bazodanowe nie są bezpośrednio wystawiane na zewnątrz, co zwiększa bezpieczeństwo i zapobiega problemom z cyklicznymi zależnościami. Pozwala również na wstępną walidację
+
+Business Logic: Cała logika, taka jak walidacja numerów ISBN, sprawdzanie dostępności egzemplarzy, znajduje się w warstwie serwisowej.
+
+## Bezpieczeństwo
+Spring Security: Zabezpiecza endpointy przed nieautoryzowanym dostępem.
+
+JWT (JSON Web Token): Autoryzacja odbywa się za pomocą tokenów JWT. Po zalogowaniu użytkownik otrzymuje token, który jest dodawany w nagłówku Authorization: Bearer <token> przy każdym zapytaniu do chronionych zasobów.
+
+RBAC (Role-Based Access Control): Dostęp do konkretnych operacji (np. dodawanie książek, usuwanie użytkowników) jest ograniczony na poziomie ról (ADMIN, LIBRARIAN, READER).
 
 ## Model bazodanowy
 ![database](./Library-database.png)
