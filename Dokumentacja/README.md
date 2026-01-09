@@ -289,6 +289,26 @@ Dostępne dla: `Brak ograniczeń`
 
 > `403 - Forbidden` gdy coś jest nie tak
 
+
+### Pobranie swoich danych
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/user/me**  
+
+**Zwraca:**
+```json
+{
+  "id": 2,
+  "firstName": "Janusz",
+  "lastName": "Nowak",
+  "email": "nowak.janusz@wp.pl",
+  "role": "READER"
+}
+```
+
+
+
 ## Operacje CRUD dla książek
 
 
@@ -728,8 +748,160 @@ Dostępne dla: `ADMIN`
 
 **`DELETE` /api/bookcopy/{id}**  
 
-## Wygląd i działanie aplikacji
 
+
+## Operacje CRUD dla wypożyczeń
+
+
+### Wypożyczenie książki użytkownikowi
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/loan/rent?userId={userId}&copyId={copyId}**
+
+**Zwraca:** *(tu dla userId=2 i copyId=2)*
+```json
+{
+  "loanId": 1,
+  "userId": 2,
+  "userEmail": "jan.kowalski@gmail.com",
+  "bookCopyId": 2,
+  "bookTitle": "Tytuł Książki",
+  "status": "ACTIVE",
+  "rentalDate": "2026-01-09T08:39:48.372451538",
+  "dueDate": "2026-02-08T08:39:48.372504871",
+  "returnDate": null
+}
+```
+
+
+### Zwrot książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/loan/return/{id}**
+
+**Zwraca:** *(tu dla id=1)*
+```json
+{
+  "loanId": 1,
+  "userId": 2,
+  "userEmail": "jan.kowasdfsdsf@gmail.com",
+  "bookCopyId": 2,
+  "bookTitle": "Tytuł Książki",
+  "status": "RETURNED",
+  "rentalDate": "2026-01-09T08:39:48.372452",
+  "dueDate": "2026-02-08T08:39:48.372505",
+  "returnDate": "2026-01-09T08:42:52.917809157"
+}
+```
+
+
+### Pobranie danego wypożyczenia
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`GET` /api/loan/{id}**
+
+**Zwraca:** *(tu dla id=1)*
+```json
+{
+  "loanId": 1,
+  "userId": 2,
+  "userEmail": "jan.kowasdfsdsf@gmail.com",
+  "bookCopyId": 2,
+  "bookTitle": "Tytuł Książki",
+  "status": "RETURNED",
+  "rentalDate": "2026-01-09T08:39:48.372452",
+  "dueDate": "2026-02-08T08:39:48.372505",
+  "returnDate": "2026-01-09T08:42:52.917809157"
+}
+```
+
+
+### Pobranie wszystkich wypożyczeń
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`GET` /api/loan**
+
+**Zwraca:**
+```json
+[
+  {
+    "loanId": 1,
+    "userId": 2,
+    "userEmail": "jan.kowasdfsdsf@gmail.com",
+    "bookCopyId": 2,
+    "bookTitle": "Tytuł Książki",
+    "status": "RETURNED",
+    "rentalDate": "2026-01-09T08:39:48.372452",
+    "dueDate": "2026-02-08T08:39:48.372505",
+    "returnDate": "2026-01-09T08:42:52.917809"
+  },
+  {
+    "loanId": 2,
+    "userId": 1,
+    "userEmail": "grzegorz1987@fred.net",
+    "bookCopyId": 3,
+    "bookTitle": "Tytuł Książki",
+    "status": "ACTIVE",
+    "rentalDate": "2026-01-09T08:46:59.63366",
+    "dueDate": "2026-02-08T08:46:59.633697",
+    "returnDate": null
+  }
+]
+```
+
+### Pobranie wypożyczeń danego użytkownika
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`GET` /api/loan/user/{id}**
+
+**Zwraca:** *(tu dla id=2)*
+```json
+[
+  {
+    "loanId": 1,
+    "userId": 2,
+    "userEmail": "jan.kowasdfsdsf@gmail.com",
+    "bookCopyId": 2,
+    "bookTitle": "Tytuł Książki",
+    "status": "RETURNED",
+    "rentalDate": "2026-01-09T08:39:48.372452",
+    "dueDate": "2026-02-08T08:39:48.372505",
+    "returnDate": "2026-01-09T08:42:52.917809157"
+  }
+]
+```
+
+### Pobranie swoich wypożyczeń
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`GET` /api/loan/me**
+
+**Zwraca:**
+```json
+[
+  {
+    "loanId": 2,
+    "userId": 1,
+    "userEmail": "grzegorz1987@fred.net",
+    "bookCopyId": 3,
+    "bookTitle": "Tytuł Książki",
+    "status": "ACTIVE",
+    "rentalDate": "2026-01-09T08:46:59.63366",
+    "dueDate": "2026-02-08T08:46:59.633697",
+    "returnDate": null
+  }
+]
+```
+
+
+
+## Wygląd i działanie aplikacji
 
 ### Strona główna
 
