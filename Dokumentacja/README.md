@@ -118,7 +118,7 @@ Dostępne dla: `ADMIN`
     "firstName": "Jan",
     "lastName": "Kowalski",
     "email": "jan.kowalski@gmail.com",
-    "password": "hasło",
+    "password": "haslo12345",
     "role": "LIBRARIAN"
 }
 ```
@@ -136,8 +136,7 @@ Dostępne dla: `ADMIN`
 
 **Możliwe błędy:**
 
-//TODO
-> `403 - Forbidden` gdy istnieje już użytkownik o podanym adresie email  
+> `403 - Forbidden` gdy coś jest nie tak
 
 
 ### Pobieranie listy użytkowników
@@ -222,8 +221,7 @@ Dostępne dla: `ADMIN`
 
 > `404 - Not Found` gdy nie istnieje użytkownik o podanym id  
 
-//TODO  
-> `403 - Forbidden` gdy istnieje już użytkownik o podanym adresie email  
+> `403 - Forbidden` gdy coś jest nie tak
 
 ### Usuwanie użytkownika
 
@@ -245,7 +243,7 @@ Dostępne dla: `Brak ograniczeń`
     "firstName": "Jan",
     "lastName": "Kowalski",
     "email": "jan.kowalski@gmail.com",
-    "password": "hasło masło"
+    "password": "haslo12345"
 }
 ```
 
@@ -262,7 +260,7 @@ Dostępne dla: `Brak ograniczeń`
 
 **Możliwe błędy:**
 
-//TODO
+> `403 - Forbidden` gdy coś jest nie tak
 
 ### Logowanie użytkownika
 
@@ -289,8 +287,7 @@ Dostępne dla: `Brak ograniczeń`
 
 **Możliwe błędy:**
 
-//TODO
-
+> `403 - Forbidden` gdy coś jest nie tak
 
 ## Operacje CRUD dla książek
 
@@ -594,7 +591,145 @@ Dostępne dla: `ADMIN`
 
 > `404 - Not Found` gdy książka o podanym id nie istnieje
 
+
+### Dodawanie nowej kopii książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/bookcopy/add/{id}?status={status}**
+
+**Zwraca:** *(tu dla id=1 i status=AVAILABLE)*
+```json
+{
+  "id": 1,
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "status": "AVAILABLE"
+}
+```
+
+
+### Dodawanie wielu nowych kopii książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/bookcopy/add/{id}?status={status}&amount={amount}**
+
+**Zwraca:** *(tu dla id=1, status=AVAILABLE i amount=2)*
+```json
+[
+  {
+    "id": 2,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  },
+  {
+    "id": 3,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  }
+]
+```
+
+
+### Pobieranie wszystkich kopii książek
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/bookcopy**
+
+**Zwraca:**
+```json
+[
+  {
+    "id": 1,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  },
+  {
+    "id": 2,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  },
+  {
+    "id": 3,
+    "bookId": 2,
+    "title": "Inny Tytuł Książki",
+    "status": "AVAILABLE"
+  }
+]
+```
+
+
+### Pobieranie wszystkich kopii danej książki
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/bookcopy/book/{id}**
+
+**Zwraca:** *(tu dla id=1)*
+```json
+[
+  {
+    "id": 1,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  },
+  {
+    "id": 2,
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "status": "AVAILABLE"
+  }
+]
+```
+
+
+### Pobieranie jednej kopii książki
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/bookcopy/{id}**
+
+**Zwraca:** *(tu dla id=1)*
+```json
+{
+  "id": 1,
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "status": "AVAILABLE"
+}
+```
+
+### Aktualizacja statusu książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`POST` /api/bookcopy/{id}/status?status={status}**
+
+**Zwraca:** *(tu dla id=1 i status=DAMAGED)*
+```json
+{
+  "id": 1,
+  "bookId": 1,
+  "title": "Tytuł Książki",
+  "status": "DAMAGED"
+}
+```
+
+### Usuwanie kopii książki
+
+Dostępne dla: `ADMIN`
+
+**`DELETE` /api/bookcopy/{id}**  
+
 ## Wygląd i działanie aplikacji
+
 
 ### Strona główna
 

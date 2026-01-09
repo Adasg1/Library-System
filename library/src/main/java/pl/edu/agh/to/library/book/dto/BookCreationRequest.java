@@ -1,6 +1,7 @@
 package pl.edu.agh.to.library.book.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record BookCreationRequest(
         @NotBlank String author,
         @NotBlank String description,
         @NotBlank String publisher,
-        @NotBlank int publishYear,
-        @NotBlank List<String> categoryNames
+        @NotNull int publishYear,
+        @NotNull List<String> categoryNames
 ) {
 }
