@@ -165,6 +165,10 @@ Dostępne dla: `ADMIN`
 }
 ```
 
+> [!NOTE]
+> System weryfikuje, czy podany adres email jest wolny. Jeśli istnieje już w bazie, operacja zostanie przerwana.
+> Hasło przesyłane w JSON jest automatycznie haszowane przed zapisem do bazy danych.
+
 **Zwraca:**
 ```json
 {
@@ -247,6 +251,7 @@ Dostępne dla: `ADMIN`
 
 > [!NOTE]  
 > Można wysłać tylko te pola które chce się zmienić
+> Email pdoczas edycji musi być unikalny w skali całej bazy
 
 **Zwraca:** *(tu dla id=2)*
 ```json
@@ -1072,7 +1077,26 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 ### Dodatkowo
 Do aktualizacji rezerwacji, których czas odbioru minął wykorzystywany jest ReservationScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status rezerwacji, których termin odbioru minął na CANCELED. Dostępne egzemplarze przypisuje do używników oczekujących w kolejce rezerwacji.
+## System Powiadomień (NotificationService)
 
+Moduł powiadomień odpowiada za automatyczną komunikację z użytkownikami za pośrednictwem poczty elektronicznej. Serwis jest zintegrowany z warstwą logiki rezerwacji i aktywuje się w momencie zmiany statusu egzemplarza na dostępny.
+
+
+Logika działania:
+
+Mechanizm wysyłki: System wykorzystuje protokół SMTP oraz bibliotekę JavaMailSender.
+
+Obsługa błędów: Proces wysyłki jest zabezpieczony przed awariami serwera pocztowego – błąd wysyłki e-maila jest logowany w systemie, ale nie przerywa głównej transakcji biznesowej (np. nie blokuje procesu zwrotu książki).
+
+Adresat: Powiadomienia są kierowane na adres e-mail przypisany do konta użytkownika (pole username w encji User).
+
+Szablon wiadomości o dostępności książki:
+
+Temat: Książka dostępna w bibliotece Mole Książkowe
+
+Treść: > Cześć [Imię],
+
+Mamy dobrą wiadomość! Książka '[Tytuł]' jest już dostępna. Została przypisana do Twojej rezerwacji. Masz 3 dni na odbiór.
 
 
 ## Wygląd i działanie aplikacji (milestone M1)
