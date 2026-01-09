@@ -1011,7 +1011,7 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 
 
-## Wygląd i działanie aplikacji
+## Wygląd i działanie aplikacji (milestone M1)
 
 ### Strona główna
 
@@ -1033,7 +1033,187 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 <img width="856" height="566" alt="image" src="https://github.com/user-attachments/assets/bf0ec032-686f-47a0-954a-a80435ece9d8" />
 
+# Frontend - opis (M2)
 
+## Użyte Technologie i Biblioteki
+* **React (Vite)** – szkielet aplikacji.
+* **React Router** – obsługa routingu i nawigacji między podstronami.
+* **Axios** – klient HTTP do komunikacji z backendem (obsługa requestów i tokenów).
+* **Tailwind CSS** – stylowanie aplikacji (utility-first CSS).
+* **Material UI (MUI)** – gotowe komponenty interfejsu (ikony, pola formularzy, przyciski).
+* **React Toastify** – wyświetlanie powiadomień dla użytkownika.
+* **Context API** – zarządzanie stanem globalnym (autoryzacja).
 
+## Struktura Projektu
+* **`/pages`** – główne widoki (podstrony) aplikacji.
+* **`/components`** – komponenty wielokrotnego użytku (np. Navbar, Karta Książki).
+* **`/services`** – logika biznesowa i komunikacja z API.
+* **`/context`** – konteksty Reacta (zarządzanie stanem zalogowanego użytkownika).
+* **`/assets`** – pliki statyczne.
 
+## Autoryzacja i Bezpieczeństwo (`AuthContext`)
 
+System autoryzacji oparty jest o **JWT (JSON Web Token)**.
+Za zarządzanie sesją odpowiada `AuthContext.jsx`.
+
+1.  **Logowanie:** Token otrzymany z backendu jest zapisywany w `localStorage`.
+2.  **Persystencja:** Przy odświeżeniu strony aplikacja sprawdza obecność tokena i automatycznie przywraca dane użytkownika.
+3.  **Wylogowanie:** Usuwa token i czyści stan użytkownika.
+4.  **Ochrona tras (`ProtectedRoute.jsx`):** Specjalny komponent-wrapper, który sprawdza, czy użytkownik jest zalogowany. Jeśli nie – przekierowuje do logowania. Obsługuje również sprawdzanie ról (np. dostęp do panelu admina tylko dla `ADMIN`).
+
+## Warstwa Komunikacji (`/services`)
+
+Komunikacja z API odbywa się poprzez skonfigurowaną instancję Axios w pliku `api.js`.
+
+* **Interceptors:** Każde zapytanie wychodzące z aplikacji jest automatycznie przechwytywane, a do nagłówka dodawany jest token: `Authorization: Bearer {token}`.
+* **Serwisy:** Logika została podzielona na tematyczne pliki:
+    * `authService` – logowanie, rejestracja, pobieranie danych profilu.
+    * `bookService` – pobieranie książek (full/brief), filtrowanie, CRUD książek.
+    * `bookCopyService` – zarządzanie egzemplarzami (dodawanie kopii, zmiana statusu).
+    * `loanService` – wypożyczanie, zwroty, historia wypożyczeń.
+    * `reservationService` – rezerwowanie książek, anulowanie rezerwacji.
+    * `userService` – zarządzanie użytkownikami (panel admina).
+    * `categoryService` – pobieranie i zarządzanie kategoriami.
+
+## Routing i Widoki
+
+Aplikacja posiada zdefiniowane następujące ścieżki w `App.jsx`:
+
+### Dostępne publicznie:
+* `/` – **HomePage**: Strona główna. Dla gości wyświetla zachętę do logowania, dla zalogowanych – dashboard z kaflami.
+* `/login` – **LoginPage**: Formularz logowania.
+* `/register` – **RegisterPage**: Formularz rejestracji nowego czytelnika.
+
+### Dostępne dla zalogowanych (READER, LIBRARIAN, ADMIN):
+* `/books` – **BookListPage**: Katalog książek. Zawiera sidebar z filtrowaniem po kategoriach oraz grid z kartami książek (`BookCard`).
+* `/books/details/:id` – **BookDetailsPage**: Szczegóły książki.
+    * Wyświetla opis, autora, wydawnictwo.
+    * Tabela egzemplarzy ze statusami.
+    * Możliwość rezerwacji (jeśli brak wolnych kopii).
+* `/profile` – **ProfilePage**: Panel użytkownika.
+    * Wyświetla dane osobowe.
+    * Tabela aktualnych wypożyczeń.
+    * Tabela rezerwacji (z opcją anulowania).
+
+### Panel Administracyjny i Obsługa (LIBRARIAN, ADMIN):
+* `/books/new` – **BookFormPage**: Formularz dodawania nowej książki (wraz z dynamicznym dodawaniem kategorii).
+* `/books/update/:id` – **BookFormPage**: Ten sam formularz w trybie edycji (pobiera dane istniejącej książki).
+* **Zarządzanie egzemplarzami** (wewnątrz `BookDetailsPage`):
+    * Dodawanie nowych kopii.
+    * Usuwanie kopii.
+    * Wypożyczanie egzemplarza konkretnemu użytkownikowi (Modal z wyborem użytkownika).
+
+### Tylko Administrator (ADMIN):
+* `/admin/users` – **AdminPage**: Tabela wszystkich użytkowników.
+    * Usuwanie użytkowników.
+    * Zmiana ról (np. awansowanie Czytelnika na Bibliotekarza).
+
+## Zmiany w Milestone 2 (M2) vs M1
+
+Wersja M1 skupiała się na fundamencie autoryzacji i profilu użytkownika. Wersja M2 wprowadza pełną logikę biznesową biblioteki.
+
+### Kluczowe nowości w M2:
+1.  **Katalog Książek (`BookListPage`):**
+    * Zastąpiono statyczne widoki dynamiczną siatką książek pobieranych z API.
+    * Dodano **Panel Kategorii** (Sidebar) umożliwiający filtrowanie księgozbioru.
+2.  **Szczegóły i Logika Wypożyczeń (`BookDetailsPage`):**
+    * Dodano widok pojedynczej książki.
+    * Zaimplementowano tabelę egzemplarzy (`BookCopy`) ze statusami (Dostępna, Wypożyczona, Zniszczona).
+    * Dodano logikę przycisku **"Wypożycz"** (dla Admina) i **"Rezerwuj"** (dla Użytkownika).
+3.  **Panel Administracyjny (`AdminPage` + `BookFormPage`):**
+    * **Zarządzanie Użytkownikami:** Tabela z możliwością usuwania użytkowników i edycji ich ról (np. awans na Bibliotekarza).
+    * **CRUD Książek:** Formularze do dodawania i edycji książek (wraz z dynamicznym przypisywaniem kategorii).
+4.  **Rozbudowa Profilu:**
+    * Sekcja "Moje Wypożyczenia" i "Moje Rezerwacje" jest teraz w pełni funkcjonalna i pobiera dane użytkownika.
+5.  **Bezpieczeństwo:**
+    * Rozbudowano `ProtectedRoute` o sprawdzanie konkretnych ról (np. dostęp do `/admin` tylko dla roli `ADMIN`).
+
+## Instrukcja uruchomienia Frontendu
+
+Aby uruchomić aplikację kliencką lokalnie:
+
+1.  **Wymagania:**
+    * Node.js (wersja 16 lub nowsza).
+    * NPM (domyślnie z Node.js).
+
+2.  **Instalacja zależności:**
+    Otwórz terminal w folderze projektu (tam gdzie plik `package.json`) i wpisz:
+    ```bash
+    npm install
+    ```
+
+3.  **Uruchomienie w trybie deweloperskim:**
+    ```bash
+    npm run dev
+    ```
+    Aplikacja zazwyczaj uruchomi się pod adresem: `http://localhost:5173`.
+
+4.  **Konfiguracja:**
+    Upewnij się, że backend (Java Spring) działa na porcie `8080`, ponieważ frontend jest skonfigurowany do łączenia się z `http://localhost:8080/api`.
+
+## Wygląd i działanie aplikacji (milestone M2)
+
+### Pełna lista podstron (Routing)
+
+**1. Strefa Publiczna (Dostępna dla każdego)**
+* `/` – **Strona Główna (HomePage) (reader)**
+    * Dla niezalogowanych: Landing page z zachętą do logowania.
+    ![alt text](image.png)
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-1.png)
+  * `/` – **Strona Główna (HomePage) (admin)**
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-2.png)
+* `/login` – **Logowanie (LoginPage)**
+    * Formularz logowania do systemu.
+    ![alt text](image-3.png)
+* `/register` – **Rejestracja (RegisterPage)**
+    * Formularz zakładania nowego konta czytelnika.
+    ![alt text](image-4.png)
+
+**2. Strefa Użytkownika (Dostępna dla: READER, LIBRARIAN, ADMIN)**
+* `/books` – **Katalog Książek (BookListPage) (reader)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-5.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (reader)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-6.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (reader)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-7.png)
+
+* `/books` – **Katalog Książek (BookListPage) (admin)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-8.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (admin)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-9.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (admin)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-10.png)
+
+**3. Strefa Bibliotekarza (Dostępna dla: LIBRARIAN, ADMIN)**
+* `/books/new` – **Dodawanie Książki (BookFormPage)**
+    * Formularz tworzenia nowej pozycji w bazie danych.
+    ![alt text](image-11.png)
+* `/books/update/:id` – **Edycja Książki (BookFormPage)**
+    * Ten sam formularz w trybie edycji (pola wypełnione danymi edytowanej książki).
+    ![alt text](image-12.png)
+
+**4. Strefa Administratora (Dostępna dla: ADMIN)**
+* `/admin/users` – **Zarządzanie Użytkownikami (AdminPage)**
+    * Tabela wszystkich użytkowników w systemie.
+    * Akcje: Usuwanie kont, edycja ról (nadawanie uprawnień).
+    ![alt text](image-13.png)
