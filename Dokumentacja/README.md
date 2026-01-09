@@ -596,6 +596,8 @@ Dostępne dla: `Brak ograniczeń`
     "bookId": 1,
     "title": "Tytuł Książki",
     "author": "Autor książki"
+    "isbn": "83-8257-131-X"
+    "availableCopies": 5
   }
 ]
 ```
@@ -637,9 +639,11 @@ Dostępne dla: `Brak ograniczeń`
 **Zwraca:** *(tu dla id = 1)*
 ```json
 {
-  "bookId": 1,
-  "title": "Tytuł Książki",
-  "author": "Autor książki"
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki"
+    "isbn": "83-8257-131-X"
+    "availableCopies": 5
 }
 ```
 
@@ -823,6 +827,9 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 }
 ```
 
+**Logika Biznesowa**
+Bibliotekarz wypożycza książkę czytelnikowi. Jeśli, akurat książką którą wziął bibliotekarz jest zarezerwowana, system sprawdza czy może przepisac rezerwacje na inny dostępny egzemplarz. Jeśli użytkownik wypożyczający książke ma na nią rezerwacje, to status rezerwacji po wypożyczniu jest zmieniany na COMPLETED. Jeśli bibliotekarz weźmie inną książkę niż ta wypożyczona, wykonywana jest podmianka egzemplarzy między rezerwacjami.
+
 
 ### Zwrot książki
 
@@ -844,6 +851,9 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "returnDate": "2026-01-09T08:42:52.917809157"
 }
 ```
+
+**Logika Biznesowa**
+Bibliotekarz odbiera książkę i zaznacza w systemie, że jest zwrócona. Status wypożycznia jest zamieniany na RETURNED. Egzemplarz zwrócony jest przypisywany do czytelnika, który jest pierwszy w kolejce rezerwacji ze statusem WAITING, a status rezerwacji jest zmieniany na READY oraz użytkownik jest powiadamiany o dostępnym egzemplarzu
 
 
 ### Pobranie danego wypożyczenia
@@ -948,6 +958,9 @@ Dostępne dla: `Zalogowany Użytkownik`
 ]
 ```
 
+### Dodatkowo
+Do aktualizacji wypożyczeń, których czas oddania minął wykorzystywany jest LoanScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status wypożyczeń po terminie na OVERDUE.
+
 
 
 ## Operacje CRUD dla Rezerwacji
@@ -975,6 +988,9 @@ Dostępne dla: `Zalogowany Użytkownik`
 }
 ```
 
+**Logika Biznesowa**
+Użytkownik składa rezerwację. Jeśli jakiś egzemplarz jest dostępny jego rezerwacja otrzymuje status READY i jakiś egzemplarz jest przypisywany do rezerwacji. Użytkownik ma 3 dni na wypożyczenie książki. Natomiast jeśli, nie ma żadnego dostępnego egzemplarza, użytkownik otrzymuje rezerwację o statusie waiting (Jest w kolejce rezerwujących). Zostanie powiadomiony, gdy będzie dla niego dostępny jakiś egzemplarz.
+
 ### Anulowanie rezerwacji
 
 Dostępne dla: `Zalogowany Użytkownik`
@@ -991,6 +1007,9 @@ Dostępne dla: `Zalogowany Użytkownik`
   "bookTitle": "Tytuł Książki"
 }
 ```
+
+**Logika Biznesowa**
+Użytkownik anuluje rezerwację. Jeśli ta rezerwacja miała status READY, czyli do odbioru, to inny użytkownik mający rezerwację o statusie waiting, przejmuje rezerwację na konkretny egzemplarz, a status jego rezerwacji jest zmieniany na READY oraz wysyłane jest do niego powiadomienie o dostępnym egzemplarzu.
 
 
 ### Pobranie rezerwacji użytkownika
@@ -1050,6 +1069,9 @@ Dostępne dla: `Zalogowany Użytkownik`
   }
 ]
 ```
+
+### Dodatkowo
+Do aktualizacji rezerwacji, których czas odbioru minął wykorzystywany jest ReservationScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status rezerwacji, których termin odbioru minął na CANCELED. Dostępne egzemplarze przypisuje do używników oczekujących w kolejce rezerwacji.
 
 
 
