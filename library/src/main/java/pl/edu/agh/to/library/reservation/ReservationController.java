@@ -1,5 +1,6 @@
 package pl.edu.agh.to.library.reservation;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +26,7 @@ public class ReservationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReservationResponse> createReservation(
             @AuthenticationPrincipal User user,
-            @RequestBody CreateReservationRequest request
+            @Valid @RequestBody CreateReservationRequest request
     ) {
         var reservation = reservationService.createReservation(user, request.bookId());
         return ResponseEntity.ok(ReservationResponse.from(reservation));

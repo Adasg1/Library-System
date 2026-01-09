@@ -1,5 +1,6 @@
 package pl.edu.agh.to.library.book;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,14 @@ public class BookController {
 
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
-    public ResponseEntity<BookFullResponse> addBook(@RequestBody BookCreationRequest request){
+    public ResponseEntity<BookFullResponse> addBook(@Valid @RequestBody BookCreationRequest request){
         Book createdBook = bookService.createBook(request);
         return ResponseEntity.status(201).body(new BookFullResponse(createdBook));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
-    public ResponseEntity<BookFullResponse> updateBook(@PathVariable int id, @RequestBody BookUpdateRequest request) {
+    public ResponseEntity<BookFullResponse> updateBook(@PathVariable int id, @Valid @RequestBody BookUpdateRequest request) {
         Book updatedBook = bookService.updateBook(id,request);
 
         return ResponseEntity.ok(new BookFullResponse(updatedBook));

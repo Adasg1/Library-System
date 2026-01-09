@@ -1,7 +1,9 @@
 package pl.edu.agh.to.library.reservation.dto;
 
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 
 public record CreateReservationRequest(
-        int bookId
+        @NotNull @Positive Integer bookId
 ) {}
