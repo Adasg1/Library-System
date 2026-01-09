@@ -309,7 +309,7 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 
 
-## Operacje CRUD dla książek
+## Operacje CRUD dla kategorii
 
 
 ### Dodawanie nowej kategorii
@@ -419,6 +419,10 @@ Dostępne dla: `ADMIN`
 **Możliwe błędy:**
 
 > `404 - Not Found` gdy kategoria o podanym id nie istnieje
+
+
+
+## Operacje CRUD dla książek
 
 
 ### Dodawanie nowej książki
@@ -611,6 +615,9 @@ Dostępne dla: `ADMIN`
 
 > `404 - Not Found` gdy książka o podanym id nie istnieje
 
+
+
+### Operacje CRUD dla kopii książek
 
 ### Dodawanie nowej kopii książki
 
@@ -895,6 +902,109 @@ Dostępne dla: `Zalogowany Użytkownik`
     "rentalDate": "2026-01-09T08:46:59.63366",
     "dueDate": "2026-02-08T08:46:59.633697",
     "returnDate": null
+  }
+]
+```
+
+
+
+## Operacje CRUD dla Rezerwacji
+
+
+### Złożenie rezerwacji
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/reservation**  
+```json
+{
+  "bookId": 1
+}
+```
+
+**Zwraca:**
+```json
+{
+  "reservationId": 1,
+  "reservationDate": "2026-01-09T09:08:09.84551806",
+  "maxPickupDate": "2026-01-12T09:08:09.854376967",
+  "status": "READY",
+  "bookTitle": "Tytuł Książki"
+}
+```
+
+### Anulowanie rezerwacji
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`PATCH` /api/reservation/{id}**  
+
+**Zwraca:** *(tu dla id=1)*
+```json
+{
+  "reservationId": 1,
+  "reservationDate": "2026-01-09T09:08:09.845518",
+  "maxPickupDate": "2026-01-12T09:08:09.854377",
+  "status": "CANCELED",
+  "bookTitle": "Tytuł Książki"
+}
+```
+
+
+### Pobranie rezerwacji użytkownika
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`GET` /api/reservation/user/{id}**  
+
+**Zwraca:** *(tu dla id=1)*
+```json
+[
+  {
+    "reservationId": 1,
+    "reservationDate": "2026-01-09T09:08:09.845518",
+    "maxPickupDate": "2026-01-12T09:08:09.854377",
+    "status": "CANCELED",
+    "bookTitle": "Tytuł Książki"
+  }
+]
+```
+
+### Pobranie rezerwacji książki
+
+Dostępne dla: `ADMIN`, `LIBRARIAN`
+
+**`GET` /api/reservation/book/{id}**  
+
+**Zwraca:** *(tu dla id=1)*
+```json
+[
+  {
+    "reservationId": 1,
+    "reservationDate": "2026-01-09T09:08:09.845518",
+    "maxPickupDate": "2026-01-12T09:08:09.854377",
+    "status": "CANCELED",
+    "bookTitle": "Tytuł Książki"
+  }
+]
+```
+
+
+### Pobranie swoich rezerwacji
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`GET` /api/reservation/me**  
+
+**Zwraca:**
+```json
+[
+  {
+    "reservationId": 1,
+    "reservationDate": "2026-01-09T09:08:09.845518",
+    "maxPickupDate": "2026-01-12T09:08:09.854377",
+    "status": "CANCELED",
+    "bookTitle": "Tytuł Książki"
   }
 ]
 ```
