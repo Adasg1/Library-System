@@ -6,6 +6,7 @@ import pl.edu.agh.to.library.book.dto.BookCreationRequest;
 import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -52,7 +53,7 @@ public class BookService {
             throw new NullPointerException("Book by that id not found");
         Book book = bookO.get();
 
-        if (request.isbn() != null){
+        if (!Objects.equals(request.isbn(), bookRepository.findById(id).get().getIsbn())){
             if (!isIsbnValid(request.isbn()))
                 throw new IllegalArgumentException("The ISBN number is not valid");
 

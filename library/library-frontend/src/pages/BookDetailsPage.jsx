@@ -310,7 +310,7 @@ const BookDetailsPage = () => {
                                         {canEdit && (
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    {copy.status === 'AVAILABLE' && (
+                                                    {(copy.status === 'AVAILABLE' || copy.status === 'RESERVED') && (
                                                         <button
                                                             onClick={() => openRentModal(copy.id)}
                                                             className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-bold transition-colors"
