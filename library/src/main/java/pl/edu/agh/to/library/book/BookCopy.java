@@ -16,6 +16,9 @@ public class BookCopy {
 
     private BookStatus status;
 
+    protected BookCopy() {
+    }
+
     public BookCopy(Book book, BookStatus status){
         this.book = book;
         this.status = status;

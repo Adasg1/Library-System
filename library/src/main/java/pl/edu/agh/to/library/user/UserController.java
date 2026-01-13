@@ -1,10 +1,13 @@
 package pl.edu.agh.to.library.user;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import pl.edu.agh.to.library.user.dto.UserCreateRequest;
 import pl.edu.agh.to.library.user.dto.UserResponse;
+import pl.edu.agh.to.library.user.dto.UserUpdateRequest;
 
 import java.util.List;
 
@@ -20,33 +23,28 @@ public class UserController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> addUser(@RequestBody User user){
-        User createdUser = userService.createUser(user);
+    public ResponseEntity<UserResponse> addUser(@Valid @RequestBody UserCreateRequest request){
+        UserResponse createdUser = userService.createUser(request);
+
         return ResponseEntity.status(201).body(createdUser);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User user){
-        var response = new UserResponse(
-                user.getUserId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getUsername(),
-                user.getRole().name()
-        );
+        var response = UserResponse.from(user);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
-    public ResponseEntity<User> getUserById(@PathVariable int id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable int id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -54,8 +52,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable int id, @RequestBody User userDetails) {
-        User updatedUser = userService.updateUser(id, userDetails);
+    public ResponseEntity<UserResponse> updateUser(@PathVariable int id, @Valid @RequestBody UserUpdateRequest userDetails) {
+        UserResponse updatedUser = userService.updateUser(id, userDetails);
         if (updatedUser != null) {
             return ResponseEntity.ok(updatedUser);
         } else {

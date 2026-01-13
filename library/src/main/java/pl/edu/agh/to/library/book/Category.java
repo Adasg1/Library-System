@@ -1,7 +1,9 @@
 package pl.edu.agh.to.library.book;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,6 +14,7 @@ public class Category {
     @GeneratedValue
     private int categoryId;
 
+    @Column(unique = true)
     private String categoryName;
 
     @ManyToMany
@@ -20,10 +23,16 @@ public class Category {
             joinColumns=@JoinColumn(name="categoryId"),
             inverseJoinColumns=@JoinColumn(name="bookId")
         )
+    @JsonIgnore
     private List<Book> books;
 
-    public Category(String name){
-        this.categoryName = name;
+    public Category(String categoryName){
+        this.categoryName = categoryName;
+        this.books = new ArrayList<>();
+    }
+
+    public Category(){
+
     }
 
     //region getters-setters

@@ -34,7 +34,6 @@ public class AuthService {
                 passwordEncoder.encode(request.password()),
                 Role.READER
                 );
-
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
         return new AuthenticationResponse(jwt, user.getUsername(), user.getFirstName(), user.getLastName(), user.getRole().name());
