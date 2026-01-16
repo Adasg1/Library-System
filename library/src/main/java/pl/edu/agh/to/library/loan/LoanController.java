@@ -31,6 +31,12 @@ public class LoanController {
         return ResponseEntity.ok(loanService.returnLoan(loanId));
     }
 
+    @PostMapping("/prolong/{loanId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<LoanResponse> prolongLoan(@PathVariable int loanId) {
+        return ResponseEntity.ok(loanService.prolongLoan(loanId));
+    }
+
     @GetMapping("/{loanId}")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
     public ResponseEntity<LoanResponse> getLoanById(@PathVariable int loanId) {

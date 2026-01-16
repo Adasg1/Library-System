@@ -19,6 +19,22 @@ const ProfilePage = () => {
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const handleProlong = async (loanId) => {
+        if (window.confirm('Czy chcesz przedłużyć termin zwrotu o 30 dni?')) {
+            try {
+                await loanService.prolongLoan(loanId);
+                // Odśwież listę wypożyczeń po udanej operacji
+                const updatedLoans = await loanService.getMyLoans();
+                setLoans(updatedLoans);
+                alert('Termin został pomyślnie przedłużony.');
+            } catch (error) {
+                // Obsługa błędów (np. przekroczenie limitu N razy lub rezerwacja)
+                const message = error.response?.data?.message || "Nie można przedłużyć tego wypożyczenia.";
+                alert(message);
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             if (user) {
@@ -114,17 +130,41 @@ const ProfilePage = () => {
                                         <th className="pb-4 text-xs font-bold text-gray-400 uppercase">Tytuł</th>
                                         <th className="pb-4 text-xs font-bold text-gray-400 uppercase">Termin</th>
                                         <th className="pb-4 text-xs font-bold text-gray-400 uppercase">Status</th>
+                                        <th className="pb-4 text-xs font-bold text-gray-400 uppercase text-right">Akcje</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
                                     {loans.map(loan => (
-                                        <tr key={loan.id} className="group hover:bg-gray-50 transition-colors">
-                                            <td className="py-4 font-medium text-gray-900">{loan.bookTitle || `Książka #${loan.bookCopyId}`}</td>
-                                            <td className="py-4 text-sm text-gray-500">{loan.dueDate}</td>
+                                        <tr key={loan.loanId} className="group hover:bg-gray-50 transition-colors">
                                             <td className="py-4">
-                                                    <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md uppercase">
-                                                        {loan.status}
-                                                    </span>
+                                                <div className="font-medium text-gray-900">{loan.bookTitle || `Książka #${loan.bookCopyId}`}</div>
+                                                {/* Opcjonalnie: Licznik prolongat z Twojego modelu Loan.java */}
+                                                {loan.timesProlonged > 0 && (
+                                                    <div className="text-[10px] text-indigo-400 font-bold uppercase">
+                                                        Przedłużono: {loan.timesProlonged} raz(y)
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="py-4 text-sm text-gray-500">
+                                                {new Date(loan.dueDate).toLocaleDateString()}
+                                            </td>
+                                            <td className="py-4">
+                                                <span className={`px-2 py-1 text-xs font-bold rounded-md uppercase ${
+                                                    loan.status === 'OVERDUE' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+                                                }`}>
+                                                    {loan.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 text-right">
+                                                {/* Przycisk prolongaty - widoczny tylko gdy status jest ACTIVE i nie ma przeterminowania */}
+                                                {loan.status === 'ACTIVE' && (
+                                                    <button
+                                                        onClick={() => handleProlong(loan.loanId)}
+                                                        className="px-3 py-1 bg-[#646cff] text-white hover:bg-[#535bf2] rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                                    >
+                                                        Prolonguj
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

@@ -30,6 +30,8 @@ public class Loan {
 
     private LocalDateTime returnDate;
 
+    private Integer timesProlonged = 0;
+
     public Loan(User user, BookCopy bookCopy, LocalDateTime rentalDate, LocalDateTime dueDate){
         this.user = user;
         this.bookCopy = bookCopy;
@@ -80,5 +82,12 @@ public class Loan {
     public void setReturnDate(LocalDateTime returnDate) {
         this.returnDate = returnDate;
     }
-    //endregion
+
+    public Integer getTimesProlonged() {
+        return timesProlonged;
+    }
+
+    public void setTimesProlonged(Integer timesProlonged) {
+        this.timesProlonged = timesProlonged;
+    }
 }

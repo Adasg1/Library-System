@@ -14,7 +14,8 @@ public record LoanResponse(
         LoanStatus status,
         LocalDateTime rentalDate,
         LocalDateTime dueDate,
-        LocalDateTime returnDate
+        LocalDateTime returnDate,
+        Integer timesProlonged
 ) {
     public static LoanResponse from(Loan loan) {
         return new LoanResponse(
@@ -26,7 +27,8 @@ public record LoanResponse(
                 loan.getStatus(),
                 loan.getRentalDate(),
                 loan.getDueDate(),
-                loan.getReturnDate()
+                loan.getReturnDate(),
+                loan.getTimesProlonged()
         );
     }
 }

@@ -17,6 +17,8 @@ import java.util.List;
 @Service
 public class LoanService {
 
+    private static final int MAX_PROLONGATIONS = 3;
+
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
     private final BookCopyService bookCopyService;
@@ -95,5 +97,24 @@ public class LoanService {
 
     public List<LoanResponse> getLoansByUser(int userId) {
         return loanRepository.findByUser_UserId(userId).stream().map(LoanResponse::from).toList();
+    }
+
+    @Transactional
+    public LoanResponse prolongLoan(int loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new NullPointerException("Loan not found"));
+
+        if (loan.getStatus() == LoanStatus.OVERDUE) {
+            throw new IllegalStateException("Can't prolong expired loan");
+        }
+
+        if (loan.getTimesProlonged() >= MAX_PROLONGATIONS) {
+            throw new IllegalStateException("Maximum prolongation limit reached");
+        }
+
+        loan.setDueDate(loan.getDueDate().plusDays(30));
+        loan.setTimesProlonged(loan.getTimesProlonged() + 1);
+
+        return LoanResponse.from(loanRepository.save(loan));
     }
 }

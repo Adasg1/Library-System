@@ -23,5 +23,11 @@ export const loanService = {
     async getMyLoans() {
         const response = await api.get("/loan/me");
         return response.data;
+    },
+
+    // Przedłużanie wypożyczenia
+    async prolongLoan(loanId){
+        const response = await api.post(`/loan/prolong/${loanId}`);
+        return response.data;
     }
 };
