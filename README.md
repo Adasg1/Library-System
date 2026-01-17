@@ -92,4 +92,4 @@ docker-compose up -d
 * Adam Głowacki - [github profile](https://github.com/Adasg1)
 * Maciej Trznadel - [github profile](https://github.com/mtrznadel24)
 * Kajetan Frątczak - [github profile](https://github.com/KajetanFratczak)
-* bartex555 - [github profile](https://github.com/bartex555)
+* Bartłomiej Kaczyński - [github profile](https://github.com/bartex555)
