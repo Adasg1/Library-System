@@ -1,10 +1,9 @@
-package pl.edu.agh.to.library.book;
+package pl.edu.agh.to.library.bookcopy;
 
-import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.to.library.book.dto.BookCopyResponse;
+import pl.edu.agh.to.library.bookcopy.dto.BookCopyResponse;
 
 import java.util.List;
 

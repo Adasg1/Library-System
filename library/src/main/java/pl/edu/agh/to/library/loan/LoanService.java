@@ -2,12 +2,11 @@ package pl.edu.agh.to.library.loan;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.edu.agh.to.library.book.BookCopy;
-import pl.edu.agh.to.library.book.BookCopyService;
-import pl.edu.agh.to.library.book.BookStatus;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookCopyService;
+import pl.edu.agh.to.library.bookcopy.BookStatus;
 import pl.edu.agh.to.library.loan.dto.LoanResponse;
 import pl.edu.agh.to.library.reservation.ReservationService;
-import pl.edu.agh.to.library.reservation.ReservationStatus;
 import pl.edu.agh.to.library.user.User;
 import pl.edu.agh.to.library.user.UserRepository;
 

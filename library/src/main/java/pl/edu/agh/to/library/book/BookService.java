@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.dto.BookBriefResponse;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
 import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
+import pl.edu.agh.to.library.category.Category;
+import pl.edu.agh.to.library.category.CategoryService;
 
 import java.util.List;
 import java.util.Objects;

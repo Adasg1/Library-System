@@ -1,7 +1,7 @@
 package pl.edu.agh.to.library.loan;
 
 import jakarta.persistence.*;
-import pl.edu.agh.to.library.book.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
 import pl.edu.agh.to.library.user.User;
 
 import java.time.LocalDateTime;

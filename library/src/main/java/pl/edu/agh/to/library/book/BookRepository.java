@@ -19,14 +19,14 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("SELECT new pl.edu.agh.to.library.book.dto.BookBriefResponse(b, CAST(COUNT(bc) AS int)) " +
             "FROM Book b " +
             "JOIN b.categories c " +
-            "LEFT JOIN b.bookCopies bc ON bc.status = pl.edu.agh.to.library.book.BookStatus.AVAILABLE " +
+            "LEFT JOIN b.bookCopies bc ON bc.status = pl.edu.agh.to.library.bookcopy.BookStatus.AVAILABLE " +
             "WHERE c.categoryId = :categoryId " +
             "GROUP BY b.bookId, b.title, b.author, b.isbn")
     List<BookBriefResponse> findAllByCategoryId(@Param("categoryId") int categoryId);
 
     @Query("SELECT new pl.edu.agh.to.library.book.dto.BookBriefResponse(" +
             "b.bookId, b.title, b.author, b.isbn, " +
-            "CAST(SUM(CASE WHEN bc.status = pl.edu.agh.to.library.book.BookStatus.AVAILABLE THEN 1 ELSE 0 END) AS int)) " +
+            "CAST(SUM(CASE WHEN bc.status = pl.edu.agh.to.library.bookcopy.BookStatus.AVAILABLE THEN 1 ELSE 0 END) AS int)) " +
             "FROM Book b " +
             "LEFT JOIN b.bookCopies bc " +
             "GROUP BY b.bookId, b.title, b.author, b.isbn")
@@ -34,7 +34,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     @Query("SELECT new pl.edu.agh.to.library.book.dto.BookBriefResponse(" +
             "b.bookId, b.title, b.author, b.isbn, " +
-            "CAST(SUM(CASE WHEN bc.status = pl.edu.agh.to.library.book.BookStatus.AVAILABLE THEN 1 ELSE 0 END) AS int)) " +
+            "CAST(SUM(CASE WHEN bc.status = pl.edu.agh.to.library.bookcopy.BookStatus.AVAILABLE THEN 1 ELSE 0 END) AS int)) " +
             "FROM Book b " +
             "LEFT JOIN b.bookCopies bc " +
             "WHERE b.bookId = :id " +
