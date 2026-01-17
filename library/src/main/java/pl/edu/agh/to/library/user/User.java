@@ -7,8 +7,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.edu.agh.to.library.loan.Loan;
+import pl.edu.agh.to.library.opinions.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,6 +43,10 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Reservation> reservations;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Opinion> opinions = new ArrayList<>();
+
     public User(String firstName,String lastName, String email, String password, Role role){
         this.firstName = firstName;
         this.lastName = lastName;
@@ -67,6 +73,10 @@ public class User implements UserDetails {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public String getDisplayName() {
+        return firstName + " " + lastName.charAt(0) + ".";
     }
 
     public void setLastName(String lastName) {
@@ -106,6 +116,10 @@ public class User implements UserDetails {
     public boolean removeReservation(Reservation reservation){
         return this.reservations.remove(reservation);
     }
+
+    public List<Opinion> getOpinions() { return opinions; }
+
+    public void setOpinions(List<Opinion> opinions) { this.opinions = opinions; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

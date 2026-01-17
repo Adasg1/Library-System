@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.bookcopy.BookCopy;
 import pl.edu.agh.to.library.category.Category;
+import pl.edu.agh.to.library.opinions.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
 import java.util.ArrayList;
@@ -32,6 +33,11 @@ public class Book {
     private String publisher;
 
     private int publishYear;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Opinion> opinions = new ArrayList<>();
+
 
     @ManyToMany
     @JoinTable(
@@ -118,6 +124,10 @@ public class Book {
     public void setPublishYear(int publishYear) {
         this.publishYear = publishYear;
     }
+
+    public List<Opinion> getOpinions() { return opinions; }
+
+    public void setOpinions(List<Opinion> opinions) { this.opinions = opinions; }
 
     public Set<Category> getCategories() {
         return categories;
