@@ -76,6 +76,8 @@ public class User implements UserDetails {
     }
 
     public String getDisplayName() {
+        if (firstName == null || lastName == null)
+            return "anonymous"; //Można też blank zostawić
         return firstName + " " + lastName.charAt(0) + ".";
     }
 
