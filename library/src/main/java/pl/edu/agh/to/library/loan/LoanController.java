@@ -60,4 +60,10 @@ public class LoanController {
     public ResponseEntity<List<LoanResponse>> getMyLoans(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(loanService.getLoansByUser(user.getUserId()));
     }
+
+    @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<List<LoanResponse>> getAllActiveLoans() {
+        return ResponseEntity.ok(loanService.getAllActiveLoans());
+    }
 }

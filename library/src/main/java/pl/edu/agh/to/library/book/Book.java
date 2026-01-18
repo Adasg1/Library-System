@@ -7,6 +7,7 @@ import pl.edu.agh.to.library.category.Category;
 import pl.edu.agh.to.library.opinions.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,8 @@ public class Book {
     private String publisher;
 
     private int publishYear;
+
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -66,6 +69,7 @@ public class Book {
         this.categories = new HashSet<>();
         this.bookCopies = new ArrayList<>();
         this.reservations = new ArrayList<>();
+        this.createdAt = LocalDateTime.now();
     }
 
     public Book() {
@@ -151,6 +155,10 @@ public class Book {
 
     public List<BookCopy> getBookCopies() {
         return bookCopies;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     //Wszystko z dołu jest raczej do usunięcia

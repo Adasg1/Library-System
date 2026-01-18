@@ -29,5 +29,10 @@ export const loanService = {
     async prolongLoan(loanId){
         const response = await api.post(`/loan/prolong/${loanId}`);
         return response.data;
+    },
+
+    async getAllActiveLoans() {
+        const response = await api.get(`/loan/active`);
+        return response.data;
     }
 };

@@ -54,9 +54,9 @@ public class BookController {
     }
 
     @GetMapping("/brief")
-    public ResponseEntity<List<BookBriefResponse>> getAllBooksBrief() {
+    public ResponseEntity<List<BookBriefResponse>> getAllBooksBrief(@RequestParam(required = false, defaultValue = "title") String sort) {
         return ResponseEntity.ok(
-                bookService.getAllBookBriefs()
+                bookService.getAllBookBriefs(sort)
         );
     }
 
@@ -68,9 +68,21 @@ public class BookController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<BookBriefResponse>> getBooksByCategory(@PathVariable int categoryId) {
-        List<BookBriefResponse> books = bookService.getBooksByCategoryId(categoryId);
+    public ResponseEntity<List<BookBriefResponse>> getBooksByCategory(@PathVariable int categoryId, @RequestParam(required = false, defaultValue = "title") String sort) {
+        List<BookBriefResponse> books = bookService.getBooksByCategoryId(categoryId, sort);
         return ResponseEntity.ok(books);
+    }
+
+    @GetMapping("/newest")
+    public ResponseEntity<List<BookBriefResponse>> getNewestBooks() {
+        return ResponseEntity.ok(bookService.getNewestBooks());
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<BookBriefResponse>> getPopularBooks(
+        @RequestParam(defaultValue = "10") int limit
+    ) {
+        return ResponseEntity.ok(bookService.getPopularBooks(limit));
     }
 
     @DeleteMapping("/{id}")

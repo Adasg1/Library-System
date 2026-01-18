@@ -98,6 +98,12 @@ public class LoanService {
         return loanRepository.findByUser_UserId(userId).stream().map(LoanResponse::from).toList();
     }
 
+    public List<LoanResponse> getAllActiveLoans() {
+        return loanRepository.findAllActiveLoans().stream()
+                .map(LoanResponse::from)
+                .toList();
+    }
+
     @Transactional
     public LoanResponse prolongLoan(int loanId) {
         Loan loan = loanRepository.findById(loanId)
