@@ -1366,3 +1366,106 @@ Aby uruchomić aplikację kliencką lokalnie:
     * Tabela wszystkich użytkowników w systemie.
     * Akcje: Usuwanie kont, edycja ról (nadawanie uprawnień).
     ![alt text](image-13.png)
+
+# Frontend - opis (M3)
+
+### Kluczowe nowości w M3:
+1. **System Opinii i Interakcji (Opinion + Reaction):**
+   * Wprowadzono moduł recenzji książek, umożliwiający **zalogowanym użytkownikom** dodawanie, edytowanie oraz usuwanie własnych opinii.
+   * Zaimplementowano system reakcji **Like / Dislike**, pozwalający użytkownikom oceniać przydatność recenzji innych czytelników.
+   * Dodano w profilu użytkownika sekcję **„Moje Opinie” (`UserOpinions`)**, umożliwiającą centralne zarządzanie wszystkimi wystawionymi recenzjami.
+
+2. **Zaawansowane Zarządzanie Wypożyczeniami:**
+   * Dodano możliwość **samodzielnego przedłużania wypożyczeń (prolongata)** przez użytkownika – maksymalnie **3 razy** dla jednego wypożyczenia.
+   * Rozszerzono model danych o pola śledzące **liczbę wykonanych prolongat**.
+   * Rozbudowano backend o obsługę **zwrotów na podstawie identyfikatora egzemplarza (`copyId`)**.
+
+3. **Wyszukiwanie i Sortowanie (`BookListPage`):**
+   * Wprowadzono dynamiczną **wyszukiwarkę (Search Bar)** filtrującą katalog książek w czasie rzeczywistym po **tytule i autorze**.
+   * Zaimplementowano **wielokryterialne sortowanie** (na podstawie statystyk tj. ilość wypożyczeń danej książki, czyli jej popularność) obsługiwane przez backend (alfabetycznie, popularność, nowość, dostępność egzemplarzy).
+
+4. **Panel Monitoringu i Statystyk (`AdminLoansPage`):**
+   * Stworzono dedykowany widok dla administratorów i bibliotekarzy do monitorowania wszystkich aktualnie aktywnych wypożyczeń w systemie.
+   * Widok pozwala na szybką identyfikację wypożyczeń po terminie (overdue) oraz umożliwia pracownikowi zatwierdzenie zwrotu książki jednym kliknięciem.
+
+5. **Modernizacja UI i UX:**
+   * Przeprowadzono **całkowity rework stron Logowania i Rejestracji**:
+     * odświeżony wygląd,
+     * poprawiona responsywność,
+     * rozbudowana walidacja danych formularzy.
+   * Znacznie usprawniono widok **Szczegółów Książki (`BookDetailsPage`)**:
+     * lepsza ekspozycja informacji o egzemplarzach,
+     * pełna integracja sekcji opinii z systemem reakcji.
+
+## Wygląd i działanie aplikacji (milestone M3)
+
+### Pełna lista podstron (Routing)
+
+**1. Strefa Publiczna (Dostępna dla każdego)**
+* `/` – **Strona Główna (HomePage) (reader)**
+    * Dla niezalogowanych: Landing page z zachętą do logowania.
+    ![alt text](image-14.png)
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-17.png)
+  * `/` – **Strona Główna (HomePage) (admin)**
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-18.png)
+* `/login` – **Logowanie (LoginPage)**
+    * Formularz logowania do systemu.
+    ![alt text](image-15.png)
+* `/register` – **Rejestracja (RegisterPage)**
+    * Formularz zakładania nowego konta czytelnika.
+    ![alt text](image-16.png)
+
+**2. Strefa Użytkownika (Dostępna dla: READER, LIBRARIAN, ADMIN)**
+* `/books` – **Katalog Książek (BookListPage) (reader)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-28.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (reader)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-29.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (reader)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-27.png)
+
+* `/books` – **Katalog Książek (BookListPage) (admin)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-19.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (admin)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-20.png)
+    ![alt text](image-21.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (admin)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-24.png)
+
+**3. Strefa Bibliotekarza (Dostępna dla: LIBRARIAN, ADMIN)**
+* `/books/new` – **Dodawanie Książki (BookFormPage)**
+    * Formularz tworzenia nowej pozycji w bazie danych.
+    ![alt text](image-23.png)
+* `/books/update/:id` – **Edycja Książki (BookFormPage)**
+    * Ten sam formularz w trybie edycji (pola wypełnione danymi edytowanej książki).
+    ![alt text](image-22.png)
+    
+
+**4. Strefa Administratora (Dostępna dla: ADMIN)**
+* `/admin/users` – **Zarządzanie Użytkownikami (AdminPage)**
+    * Tabela wszystkich użytkowników w systemie.
+    * Akcje: Usuwanie kont, edycja ról (nadawanie uprawnień).
+    ![alt text](image-25.png)
+    
+* `/admin/loans` – **Statystyki i Aktywne Wypożyczenia (AdminLoansPage)**
+    * Panel monitorujący wszystkie aktywne wypożyczenia w systemie, ułatwiający kontrolę nad obiegiem książek..
+    ![alt text](image-26.png)
