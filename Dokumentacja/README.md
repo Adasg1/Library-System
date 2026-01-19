@@ -855,7 +855,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "ACTIVE",
   "rentalDate": "2026-01-09T08:39:48.372451538",
   "dueDate": "2026-02-08T08:39:48.372504871",
-  "returnDate": null
+  "returnDate": null,
+  "timesProlonged": 0
 }
 ```
 
@@ -880,7 +881,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "RETURNED",
   "rentalDate": "2026-01-09T08:39:48.372452",
   "dueDate": "2026-02-08T08:39:48.372505",
-  "returnDate": "2026-01-09T08:42:52.917809157"
+  "returnDate": "2026-01-09T08:42:52.917809157",
+  "timesProlonged": 0
 }
 ```
 
@@ -905,7 +907,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "RETURNED",
   "rentalDate": "2026-01-09T08:39:48.372452",
   "dueDate": "2026-02-08T08:39:48.372505",
-  "returnDate": "2026-01-09T08:42:52.917809157"
+  "returnDate": "2026-01-09T08:42:52.917809157",
+  "timesProlonged": 0
 }
 ```
 
@@ -928,7 +931,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "RETURNED",
     "rentalDate": "2026-01-09T08:39:48.372452",
     "dueDate": "2026-02-08T08:39:48.372505",
-    "returnDate": "2026-01-09T08:42:52.917809"
+    "returnDate": "2026-01-09T08:42:52.917809",
+    "timesProlonged": 0
   },
   {
     "loanId": 2,
@@ -939,7 +943,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "ACTIVE",
     "rentalDate": "2026-01-09T08:46:59.63366",
     "dueDate": "2026-02-08T08:46:59.633697",
-    "returnDate": null
+    "returnDate": null,
+    "timesProlonged": 0
   }
 ]
 ```
@@ -962,7 +967,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "RETURNED",
     "rentalDate": "2026-01-09T08:39:48.372452",
     "dueDate": "2026-02-08T08:39:48.372505",
-    "returnDate": "2026-01-09T08:42:52.917809157"
+    "returnDate": "2026-01-09T08:42:52.917809157",
+    "timesProlonged": 0
   }
 ]
 ```
@@ -985,10 +991,38 @@ Dostępne dla: `Zalogowany Użytkownik`
     "status": "ACTIVE",
     "rentalDate": "2026-01-09T08:46:59.63366",
     "dueDate": "2026-02-08T08:46:59.633697",
-    "returnDate": null
+    "returnDate": null,
+    "timesProlonged": 0
   }
 ]
 ```
+
+### Przedłużenie wypożyczenia
+
+**`POST` /api/prolong/{loanId}**
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**Zwraca:**
+```json
+[
+  {
+    "loanId": 2,
+    "userId": 1,
+    "userEmail": "grzegorz1987@fred.net",
+    "bookCopyId": 3,
+    "bookTitle": "Tytuł Książki",
+    "status": "ACTIVE",
+    "rentalDate": "2026-01-09T08:46:59.63366",
+    "dueDate": "2026-03-08T08:46:59.633697",
+    "returnDate": null,
+    "timesProlonged": 2
+  }
+]
+```
+
+> [!NOTE]  
+> Wypożyczenie możemy przedłużać maksymalnie trzy razy.
 
 ### Dodatkowo
 Do aktualizacji wypożyczeń, których czas oddania minął wykorzystywany jest LoanScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status wypożyczeń po terminie na OVERDUE.
