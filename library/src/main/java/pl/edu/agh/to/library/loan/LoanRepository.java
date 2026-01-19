@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Integer> {
@@ -13,4 +14,6 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
 
     @Query("SELECT l FROM Loan l WHERE l.status <> pl.edu.agh.to.library.loan.LoanStatus.RETURNED ORDER BY l.dueDate ASC")
     List<Loan> findAllActiveLoans();
+
+    Optional<Loan> findFirstByBookCopy_BookCopyIdAndStatusIn(int bookCopyId, List<LoanStatus> statuses);
 }

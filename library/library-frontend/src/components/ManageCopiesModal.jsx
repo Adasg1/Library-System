@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -17,17 +17,22 @@ import {
     Chip,
     Stack,
     Box,
-    Tooltip
+    Tooltip,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
     Close,
     AddCircleOutline,
     Delete,
     Settings,
-    BookmarkAdd
+    BookmarkAdd,
+    AssignmentReturn,
+    Search // Ikona lupy
 } from '@mui/icons-material';
 import { toast } from "react-toastify";
 import { bookCopyService } from "../services/bookCopyService.js";
+import { loanService } from "../services/loanService.js";
 
 const ManageCopiesModal = ({
                                open,
@@ -38,7 +43,7 @@ const ManageCopiesModal = ({
                                onRentClick
                            }) => {
 
-    const [selectedUserId, setSelectedUserId] = useState("");
+    const [searchId, setSearchId] = useState("");
 
     const getStatusConfig = (status) => {
         switch (status) {
@@ -74,6 +79,21 @@ const ManageCopiesModal = ({
         }
     };
 
+    const handleReturnCopy = async (copyId) => {
+        if (!window.confirm("Czy na pewno chcesz zwrócić ten egzemplarz")) return;
+        try {
+            await loanService.returnBookByCopyId(copyId);
+            toast.info("Zwrócono egzemplarz.");
+            onRefresh();
+        } catch (error) {
+            toast.error("Nie udało się zwrócić egzemplarza");
+        }
+    }
+
+    const filteredCopies = copies.filter((copy) =>
+        copy.id.toString().includes(searchId)
+    );
+
     return (
         <Dialog
             open={open}
@@ -98,21 +118,43 @@ const ManageCopiesModal = ({
             {/* --- TREŚĆ --- */}
             <DialogContent dividers sx={{ p: 3 }}>
 
-                {/* Pasek górny: Licznik + Przycisk Dodaj */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={3}
+                    gap={2}
+                >
                     <Typography variant="body1" color="text.secondary">
                         Łącznie egzemplarzy: <strong>{copies.length}</strong>
                     </Typography>
 
-                    <Button
-                        variant="contained"
-                        color="success"
-                        startIcon={<AddCircleOutline />}
-                        onClick={handleAddCopy}
-                        sx={{ textTransform: 'none', fontWeight: 'bold' }}
-                    >
-                        Dodaj Egzemplarz
-                    </Button>
+                    <Stack direction="row" gap={2} alignItems="center">
+                        <TextField
+                            size="small"
+                            placeholder="Szukaj ID..."
+                            value={searchId}
+                            onChange={(e) => setSearchId(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search fontSize="small" color="action" />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ width: '180px' }}
+                        />
+
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<AddCircleOutline />}
+                            onClick={handleAddCopy}
+                            sx={{ textTransform: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                        >
+                            Dodaj egzemplarz
+                        </Button>
+                    </Stack>
                 </Stack>
 
                 {/* Tabela */}
@@ -126,6 +168,18 @@ const ManageCopiesModal = ({
                     >
                         <Typography color="text.secondary">Brak egzemplarzy w systemie.</Typography>
                     </Box>
+                ) : filteredCopies.length === 0 ? (
+                    <Box
+                        p={4}
+                        textAlign="center"
+                        border="1px solid #eee"
+                        borderRadius={2}
+                        bgcolor="#fff"
+                    >
+                        <Typography color="text.secondary">
+                            Nie znaleziono egzemplarza o ID zawierającym "<strong>{searchId}</strong>".
+                        </Typography>
+                    </Box>
                 ) : (
                     <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
                         <Table size="small">
@@ -137,10 +191,11 @@ const ManageCopiesModal = ({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {copies.map((copy) => {
+                                {filteredCopies.map((copy) => {
                                     const statusConfig = getStatusConfig(copy.status);
                                     const isAvailable = copy.status === 'AVAILABLE';
                                     const canRent = isAvailable || copy.status === 'RESERVED';
+                                    const canReturn = copy.status === 'LOANED';
 
                                     return (
                                         <TableRow key={copy.id} hover>
@@ -152,7 +207,7 @@ const ManageCopiesModal = ({
                                                     label={statusConfig.label}
                                                     color={statusConfig.color}
                                                     size="small"
-                                                    variant="filled" // lub "outlined"
+                                                    variant="filled"
                                                     sx={{ fontWeight: 600, minWidth: 100 }}
                                                 />
                                             </TableCell>
@@ -162,13 +217,41 @@ const ManageCopiesModal = ({
                                                     {canRent && (
                                                         <Button
                                                             size="small"
-                                                            variant="outlined"
+                                                            variant="contained"
                                                             color="primary"
                                                             startIcon={<BookmarkAdd />}
                                                             onClick={() => onRentClick(copy.id)}
-                                                            sx={{ textTransform: 'none', fontWeight: 600 }}
+                                                            sx={{
+                                                                textTransform: 'none',
+                                                                fontWeight: 600,
+                                                                minWidth: '120px'
+                                                            }}
                                                         >
                                                             Wypożycz
+                                                        </Button>
+                                                    )}
+
+                                                    {/* Przycisk ZWRÓĆ */}
+                                                    {canReturn && (
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="warning"
+                                                            startIcon={<AssignmentReturn />}
+                                                            onClick={() => handleReturnCopy(copy.id)}
+                                                            sx={{
+                                                                textTransform: 'none',
+                                                                fontWeight: 600,
+                                                                minWidth: '120px',
+                                                                borderColor: '#ed6c02',
+                                                                color: '#e65100',
+                                                                '&:hover': {
+                                                                    borderColor: '#e65100',
+                                                                    backgroundColor: 'rgba(237, 108, 2, 0.04)'
+                                                                }
+                                                            }}
+                                                        >
+                                                            Zwróć
                                                         </Button>
                                                     )}
 

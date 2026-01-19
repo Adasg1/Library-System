@@ -112,7 +112,6 @@ public class ReservationService {
             reservationRepository.save(reservation);
             notificationService.sendBookAvailableNotification(reservation.getUser(), copy.getBook().getTitle());
             System.out.println("Sending email for book copy with id" + copy.getBookCopyId());
-            // TODO Logika wysyłania powiadomień np. na email
         }
         else {
             bookCopyService.updateStatus(copy.getBookCopyId(), BookStatus.AVAILABLE);
@@ -138,12 +137,8 @@ public class ReservationService {
         reservationRepository.saveAll(expiredReservations);
     }
 
-    public void updateReservationAfterLoan(int userId, int bookId) {
-        var statuses = List.of(ReservationStatus.READY);
-        Optional<Reservation> userReservation = reservationRepository
-                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(userId, bookId, statuses);
-
-        userReservation.ifPresent(reservation -> {
+    public void updateReservationAfterLoan(Optional<Reservation> reservationOpt) {
+        reservationOpt.ifPresent(reservation -> {
             reservation.setStatus(ReservationStatus.COMPLETED);
             reservationRepository.save(reservation);
         });
@@ -190,5 +185,12 @@ public class ReservationService {
         }
 
         throw new IllegalStateException("This copy is reserved! No more available copies!");
+    }
+
+    public void releaseCopyReservation(Optional<Reservation> existingReservation) {
+        var reservation = existingReservation.get();
+        var copy = reservation.getAssignedCopy();
+        copy.setStatus(BookStatus.AVAILABLE);
+        bookCopyRepository.save(copy);
     }
 }
