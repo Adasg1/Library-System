@@ -85,6 +85,11 @@ public class BookController {
         return ResponseEntity.ok(bookService.getPopularBooks(limit));
     }
 
+    @GetMapping("/related/{bookId}")
+    public ResponseEntity<List<BookBriefResponse>> getRelatedBooks(@PathVariable int bookId) {
+        return ResponseEntity.ok(bookService.getRelatedBooks(bookId));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteBook(@PathVariable int id) {

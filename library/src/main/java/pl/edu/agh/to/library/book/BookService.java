@@ -1,6 +1,7 @@
 package pl.edu.agh.to.library.book;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.dto.BookBriefResponse;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
@@ -204,5 +205,10 @@ public class BookService {
                 .filter(c -> c.getStatus() == BookStatus.AVAILABLE)
                 .count();
         return new BookBriefResponse(book, availableCopies);
+    }
+
+    public List<BookBriefResponse> getRelatedBooks(int bookId) {
+        Pageable tenCopies = PageRequest.of(0, 10);
+        return bookRepository.findRelatedBooksOrderByPopularity(bookId, tenCopies);
     }
 }

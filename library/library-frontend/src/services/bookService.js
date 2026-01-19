@@ -27,6 +27,11 @@ export const bookService = {
         return response.data;
     },
 
+    async getRelatedBooks(bookId) {
+        const response = await api.get(`/book/related/${bookId}`);
+        return response.data;
+    },
+
     // Dla Admina/Pracownika
 
     // Tworzenie książki

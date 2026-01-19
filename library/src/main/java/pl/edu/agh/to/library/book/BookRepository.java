@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pl.edu.agh.to.library.book.dto.BookBriefResponse;
-import org.springframework.data.domain.Pageable; // do ograniczenia liczby wyników, np. do top 10 ostatnio dodanych
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -140,4 +140,15 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             "ORDER BY (SELECT COUNT(l) FROM Loan l WHERE l.bookCopy.book = b) DESC")
     List<BookBriefResponse> findAllOrderedByPopularity();
 
+    @Query("SELECT new pl.edu.agh.to.library.book.dto.BookBriefResponse(" +
+            "b.bookId, b.title, b.author, b.isbn, b.createdAt, " +
+            "CAST(SUM(CASE WHEN bc.status = pl.edu.agh.to.library.bookcopy.BookStatus.AVAILABLE THEN 1 ELSE 0 END) AS int)) " +
+            "FROM Book b " +
+            "JOIN b.categories c " +
+            "LEFT JOIN b.bookCopies bc " +
+            "WHERE b.bookId <> :bookId " +
+            "AND c IN (SELECT c2 FROM Book b2 JOIN b2.categories c2 WHERE b2.bookId = :bookId) " +
+            "GROUP BY b.bookId, b.title, b.author, b.isbn, b.createdAt " +
+            "ORDER BY (SELECT COUNT(l) FROM Loan l WHERE l.bookCopy.book = b) DESC")
+    List<BookBriefResponse> findRelatedBooksOrderByPopularity(@Param("bookId") int bookId, Pageable pageable);
 }

@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { useParams, Link } from 'react-router';
 import { bookService } from "../services/bookService.js";
-import { loanService } from "../services/loanService.js";
 import { bookCopyService } from "../services/bookCopyService.js";
-import { userService } from "../services/userService.js";
 import { reservationService } from "../services/reservationService.js";
 import { useAuth } from "../context/AuthContext.jsx";
-import { ArrowBack, Edit, Delete, AddCircleOutline, MenuBook, BookmarkBorder, Settings, Close } from '@mui/icons-material';
-import { toast } from "react-toastify";
+import {ArrowBack, Edit, MenuBook, BookmarkBorder, Settings, AutoStories} from '@mui/icons-material';
+import {toast, ToastContainer} from "react-toastify";
+import RentBookModal from "../components/RentModal.jsx";
+import ManageCopiesModal from "../components/ManageCopiesModal.jsx";
+import BookCard from "../components/BookCard.jsx";
 
 const BookDetailsPage = () => {
     const { id } = useParams();
@@ -16,18 +17,18 @@ const BookDetailsPage = () => {
     const [book, setBook] = useState(null);
     const [copies, setCopies] = useState([]);
     const [imgError, setImgError] = useState(false);
-    const [users, setUsers] = useState([]);
+
+    const [relatedBooks, setRelatedBooks] = useState([]);
 
     const [showRentModal, setShowRentModal] = useState(false);
     const [showManageModal, setShowManageModal] = useState(false);
-
     const [selectedCopyForRent, setSelectedCopyForRent] = useState(null);
-    const [selectedUserId, setSelectedUserId] = useState("");
 
     const canEdit = user?.role === 'ADMIN' || user?.role === 'LIBRARIAN';
 
     useEffect(() => {
         const loadBookDetails = async () => {
+            setImgError(false);
             try {
                 const data = await bookService.getFullBookById(id);
                 setBook(data);
@@ -40,6 +41,22 @@ const BookDetailsPage = () => {
         loadBookDetails();
     }, [id]);
 
+    useEffect(() => {
+        if (!book) return;
+
+        const fetchRelatedBooks = async () => {
+            try {
+                const data = await bookService.getRelatedBooks(book.bookId);
+
+                setRelatedBooks(data);
+            } catch (error) {
+                console.error("Błąd pobierania podobnych książek", error);
+            }
+        };
+
+        fetchRelatedBooks();
+    }, [book]);
+
     const loadCopies = async (bookId) => {
         try{
             const copiesData = await bookCopyService.getCopiesByBookId(bookId);
@@ -49,208 +66,80 @@ const BookDetailsPage = () => {
         }
     };
 
-    const openRentModal = async (copyId) => {
+    const refreshCopies = () => {
+        if (book?.bookId) { loadCopies(book.bookId); }
+    };
+
+    const handleOpenRentModal = (copyId) => {
         setSelectedCopyForRent(copyId);
         setShowRentModal(true);
-        setSelectedUserId("");
-        if (users.length === 0){
-            try{
-                const usersData = await userService.getUsers();
-                setUsers(usersData);
-            } catch (error) {
-                toast.error("Nie udało się pobrać listy użytkowników");
+    };
+
+    const handleDeleteDummy = () => {
+        // Nic nie robimy, bo w sekcji "Podobne" nie chcemy dawać opcji usuwania
+        console.log("Usuwanie zablokowane w tym widoku");
+    };
+
+    const handleReservation = async (book) => {
+        if (window.confirm(`Czy na pewno chcesz zarezerwować książkę: ${book.title}`)) {
+            try {
+                const reservation = await reservationService.createReservation({bookId: book.bookId})
+                if (reservation.status === "READY") {
+                    const formattedDate = new Date(reservation.maxPickupDate).toLocaleString('pl-PL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    refreshCopies();
+
+                    toast.success(
+                        <div>
+                            <p className="font-bold">📚 Zarezerwowano: "{book.title}"</p>
+                            <p className="text-sm">Czas na odbiór do: <strong>{formattedDate}</strong></p>
+                        </div>,
+                        { position: "top-right", autoClose: 8000 }
+                    );
+                } else if (reservation.status === "WAITING") {
+                    toast.success(`📚 Zarezerwowano: "${book.title}"! Powiadomimy cie mailowo, gdy tytuł będzie dostępny`, {
+                        position: "top-right",
+                        autoClose: 8000,
+                    });
+                }
+
+            } catch (e) {
+                console.log(e);
+                toast.error(`📚 Rezerwacja "${book.title}"  nie powiodła się! Być może już ją zarezerwowałeś ?`, {
+                    position: "top-right",
+                    autoClose: 8000,
+                });
             }
-        }
-    };
-
-    const handleRentSubmit = async () => {
-        if (!selectedUserId) {
-            toast.warn("Wybierz użytkownika z listy!");
-            return;
-        }
-        try{
-            await loanService.rentBook(selectedUserId, selectedCopyForRent);
-            toast.success(`Sukces! Wypożyczono egzemplarz dla użytkownika ID: ${selectedUserId}`);
-            setShowRentModal(false);
-            loadCopies(book.bookId);
-        } catch (error) {
-            toast.error("Błąd wypożyczania. Sprawdź czy użytkownik nie ma blokad.");
-            setShowRentModal(false);
-        }
-    };
-
-    const handleReserve = async () => {
-        if (!user){
-            toast.warn("Musisz być zalogowany, aby zarezerwować.");
-            return;
-        }
-        try {
-            await reservationService.createReservation({
-                bookId: book.bookId
-            });
-            toast.success("Sukces! Zarezerwowano książkę.");
-        } catch (error) {
-            console.error(error);
-            toast.error("Nie udało się zarezerwować książki (być może już ją rezerwujesz).");
         }
     }
 
-    // Obsługa dodawania nowej kopii
-    const handleAddCopy = async () => {
-        if (!book) return;
-        try {
-            await bookCopyService.addCopy(book.bookId, "AVAILABLE");
-            toast.success("Dodano nowy egzemplarz!");
-            loadCopies(book.bookId);
-        } catch (error) {
-            toast.error("Błąd podczas dodawania egzemplarza.");
-        }
-    };
+    const availableCopiesCount = useMemo(() => {
+        return copies.filter(c => c.status === 'AVAILABLE').length;
+    }, [copies])
 
-    const handleDeleteCopy = async (copyId) => {
-        if(!window.confirm("Czy na pewno usunąć ten egzemplarz?")) return;
-        try {
-            await bookCopyService.deleteCopy(copyId);
-            toast.info("Usunięto egzemplarz.");
-            loadCopies(book.bookId);
-        } catch (error) {
-            toast.error("Nie można usunąć egzemplarza (być może jest wypożyczony).");
-        }
-    };
+
 
     if (!book){
         return <div className="p-8 text-center text-gray-500">Ładowanie szczegółów...</div>;
     }
 
-    const availableCopiesCount = copies.filter(c => c.status === 'AVAILABLE').length;
-
     const coverUrl = book.isbn
         ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`
         : null;
 
+    const isAvailable = availableCopiesCount > 0;
+    const containerClass = isAvailable
+        ? "bg-blue-50 border-blue-100"
+        : "bg-red-50 border-red-100";
+
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-12 relative">
-
-            {/* --- MODAL WYPOŻYCZANIA --- */}
-            {showRentModal && (
-                <div className="fixed inset-0 bg-gray-50 bg-opacity-60 flex justify-center items-center z-[60] p-4">
-                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md border-gray-100 relative">
-                        <h3 className="text-xl font-bold mb-4 text-gray-800">Wypożycz egzemplarz #{selectedCopyForRent}</h3>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Wybierz czytelnika:</label>
-                        <select
-                            className="w-full border border-gray-300 rounded-lg p-2.5 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
-                            value={selectedUserId}
-                            onChange={(e) => setSelectedUserId(e.target.value)}
-                        >
-                            <option value="">-- Wybierz z listy --</option>
-                            {users.map((u) => (
-                                <option key={u.id || u.userId} value={u.id || u.userId}>
-                                    {u.email} ({u.firstName ? `${u.firstName} ${u.lastName}` : u.username})
-                                </option>
-                            ))}
-                        </select>
-                        <div className="flex justify-end gap-3">
-                            <button onClick={() => setShowRentModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Anuluj</button>
-                            <button onClick={handleRentSubmit} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">Zatwierdź</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* --- ZARZĄDZANIE EGZEMPLARZAMI --- */}
-            {showManageModal && (
-                <div className="fixed inset-0 bg-gray-50 bg-opacity-50 flex justify-center items-center z-40 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col border border-gray-200">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                <Settings className="text-gray-500" />
-                                Zarządzanie Egzemplarzami
-                            </h3>
-                            <button
-                                onClick={() => setShowManageModal(false)}
-                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
-                            >
-                                <Close />
-                            </button>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto">
-                            <div className="flex justify-between items-center mb-6">
-                                <div className="text-sm text-gray-500">
-                                    Łącznie egzemplarzy: <span className="font-bold text-gray-800">{copies.length}</span>
-                                </div>
-                                <button
-                                    onClick={handleAddCopy}
-                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm"
-                                >
-                                    <AddCircleOutline fontSize="small" /> Dodaj Egzemplarz
-                                </button>
-                            </div>
-
-                            {copies.length === 0 ? (
-                                <div className="p-12 text-center text-gray-400 border-dashed border-2 border-gray-100 rounded-xl">
-                                    Brak egzemplarzy w systemie.
-                                </div>
-                            ) : (
-                                <div className="overflow-x-auto border border-gray-200 rounded-xl">
-                                    <table className="w-full text-left">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Akcje</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100 bg-white">
-                                        {copies.map((copy) => (
-                                            <tr key={copy.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-gray-700">
-                                                    #{copy.id}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                                                        copy.status === 'AVAILABLE'
-                                                            ? 'bg-green-50 text-green-700 border-green-100'
-                                                            : copy.status === 'LOANED'
-                                                                ? 'bg-red-50 text-red-700 border-red-100'
-                                                                : 'bg-yellow-50 text-yellow-700 border-yellow-100'
-                                                    }`}>
-                                                        {copy.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        {(copy.status === 'AVAILABLE' || copy.status === 'RESERVED') && (
-                                                            <button
-                                                                onClick={() => openRentModal(copy.id)}
-                                                                className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-bold transition-colors border border-blue-100"
-                                                            >
-                                                                Wypożycz
-                                                            </button>
-                                                        )}
-                                                        <button
-                                                            onClick={() => handleDeleteCopy(copy.id)}
-                                                            className={`px-2 py-1 rounded-md text-xs font-bold transition-colors ${
-                                                                copy.status !== 'AVAILABLE'
-                                                                    ? 'text-gray-300 cursor-not-allowed'
-                                                                    : 'text-red-600 hover:bg-red-50'
-                                                            }`}
-                                                            disabled={copy.status !== 'AVAILABLE'}
-                                                        >
-                                                            <Delete fontSize="small" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ToastContainer />
 
             <div className="max-w-6xl mx-auto">
                 {/* --- HEADER --- */}
@@ -294,7 +183,7 @@ const BookDetailsPage = () => {
                                     ) : (
                                         <div className="text-center p-6 text-gray-400">
                                             <MenuBook style={{ fontSize: 64, marginBottom: '10px' }} />
-                                            <p className="text-sm font-medium">Brak okładki</p>
+                                            <p className="text-sm font-medium">{book.title}</p>
                                         </div>
                                     )}
                                 </div>
@@ -337,19 +226,27 @@ const BookDetailsPage = () => {
                                     </p>
                                 </div>
 
-                                <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className={`${containerClass} border  rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4`}>
                                     <div>
-                                        <p className="text-blue-900 font-medium text-sm uppercase tracking-wide mb-1">Dostępność w bibliotece</p>
+                                        <p className={`${isAvailable ? 'text-blue-900' : 'text-red-900'} font-medium text-sm uppercase tracking-wide mb-1`}>Dostępność w bibliotece</p>
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-blue-800">Ilość dostępnych egzemplarzy: </span>
-                                            <span className={`text-3xl font-bold ${availableCopiesCount > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
-                                                {availableCopiesCount}
-                                            </span>
+                                            {availableCopiesCount > 0 ? (
+                                                <>
+                                                    <span className="text-blue-800">Ilość dostępnych egzemplarzy: </span>
+                                                    <span className="text-3xl font-bold text-blue-700">
+                                                        {availableCopiesCount}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-red-700 font-bold text-lg">
+                                                    Brak dostępnych egzemplarzy
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
                                     <button
-                                        onClick={handleReserve}
+                                        onClick={() => handleReservation(book)}
                                         className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
                                     >
                                         <BookmarkBorder />
@@ -368,7 +265,42 @@ const BookDetailsPage = () => {
                     </div>
                 </div>
 
+                {relatedBooks.length > 0 && (
+                    <div className="animate-fadeIn">
+                        <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-4">
+                            <AutoStories className="text-indigo-500" />
+                            <h2 className="text-2xl font-bold text-gray-800">Zobacz również</h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {relatedBooks.map(relatedBook => (
+                                <BookCard
+                                    key={relatedBook.bookId}
+                                    book={relatedBook}
+                                    user={user}
+                                    onReservation={handleReservation}
+                                    onDelete={handleDeleteDummy}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
             </div>
+            <ManageCopiesModal
+                open={showManageModal}
+                onClose={() => setShowManageModal(false)}
+                bookId={book.bookId}
+                copies={copies}
+                onRefresh={refreshCopies}
+                onRentClick={handleOpenRentModal}
+            />
+            <RentBookModal
+                open={showRentModal}
+                onClose={() => setShowRentModal(false)}
+                copyId={selectedCopyForRent}
+                onRentSuccess={refreshCopies}
+            />
         </div>
     );
 };
