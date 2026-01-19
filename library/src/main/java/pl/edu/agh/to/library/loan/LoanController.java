@@ -27,8 +27,14 @@ public class LoanController {
 
     @PostMapping("/return/{loanId}")
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
-    public ResponseEntity<LoanResponse> returnBook(@PathVariable int loanId) {
+    public ResponseEntity<LoanResponse> returnBookByLoanId(@PathVariable int loanId) {
         return ResponseEntity.ok(loanService.returnLoan(loanId));
+    }
+
+    @PostMapping("/return/copy/{copyId}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<LoanResponse> returnBookByCopyId(@PathVariable int copyId) {
+        return ResponseEntity.ok(loanService.returnLoanByCopyId(copyId));
     }
 
     @PostMapping("/prolong/{loanId}")

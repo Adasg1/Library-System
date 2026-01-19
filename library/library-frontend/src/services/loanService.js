@@ -13,6 +13,12 @@ export const loanService = {
         return response.data;
     },
 
+    // Zwracanie książki po id kopii
+    async returnBookByCopyId(copyId) {
+        const response = await api.post(`loan/return/copy/${copyId}`);
+        return response.data;
+    },
+
     // Pobieranie wypożyczeń użytkownika
     async getUserLoans(userId) {
         const response = await api.get(`/loan/user/${userId}`);
