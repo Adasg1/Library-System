@@ -86,6 +86,7 @@ Przedstawia kategorie, rodzaje i gatunki książek dostępnych w bibliotece
 * `String` description
 * `String` publisher
 * `int` publishYear
+* `LocalDateTime` createdAt
 * `Set<Category>` categories
 * `List<BookCopy>` bookCopies
 * `List<Reservation>` reservations
@@ -116,6 +117,7 @@ Enumerator - stan egzemplarza książki
 * `LocalDateTime` rentalDate
 * `LocalDateTime` dueDate
 * `LocalDateTime` returnDate
+* `int` timesProlonged
 
 Klasa przedstawia pożyczkę książki przez danego użytkownika, jej daty pożyczenia oraz oddania jak również jej status. Historia wypożyczeń jest przechowywana do celów archiwalnych
 
@@ -145,7 +147,32 @@ Przedstawia rezerwacje książek. Rezerwacje mogą być użyte gdy użytkownik 
 
 Enumerator - status rezerwacji
 
+### Opinion
+* `int` opinionId
+* `String` content
+* `int` likes
+* `int` dislikes
+* `Book` book
+* `User` user
+* `Set<OpinionReaction>` reactions
 
+Przedstawia opinię wydaną przez użytkownika na temat danej książki
+
+### OpinionReaction
+
+* `int` reactionId
+* `User` user
+* `Opinion` opinion
+* `Reaction` reaction
+
+Przedstawia reakcję użytkownika na temat danej opinii. Jest to Like lub Dislike
+
+### Reaction
+* `NONE`
+* `LIKE`
+* `DISLIKE`
+
+Enumerator - reakcja na opinię
 
 ## Operacje CRUD dla użytkownika
 
