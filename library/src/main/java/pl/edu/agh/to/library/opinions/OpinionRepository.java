@@ -16,4 +16,5 @@ public interface OpinionRepository extends JpaRepository<Opinion, Integer> {
 
     Optional<Opinion> findByUser_UserIdAndBook_BookId(int useId, int bookId);
 
+    List<Opinion> findAllByUser_UserId(int userId);
 }

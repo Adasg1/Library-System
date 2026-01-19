@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.Book;
 import pl.edu.agh.to.library.book.BookRepository;
 import pl.edu.agh.to.library.opinion_reactions.OpinionReaction;
+import pl.edu.agh.to.library.opinion_reactions.OpinionReactionRepository;
 import pl.edu.agh.to.library.opinion_reactions.Reaction;
 import pl.edu.agh.to.library.opinions.dto.OpinionResponse;
 import pl.edu.agh.to.library.user.User;
@@ -20,10 +21,12 @@ public class OpinionService {
 
     private final OpinionRepository opinionRepository;
     private final BookRepository bookRepository;
+    private final OpinionReactionRepository opinionReactionRepository;
 
-    public OpinionService(OpinionRepository opinionRepository, BookRepository bookRepository) {
+    public OpinionService(OpinionRepository opinionRepository, BookRepository bookRepository, OpinionReactionRepository opinionReactionRepository) {
         this.opinionRepository = opinionRepository;
         this.bookRepository = bookRepository;
+        this.opinionReactionRepository = opinionReactionRepository;
     }
 
     public Opinion createOpinion(User user, int bookId, String content) {
@@ -43,11 +46,28 @@ public class OpinionService {
         return opinionRepository.save(opinion);
     }
 
-    public List<Opinion> getOpinionsByBookId(int bookId) {
-        return opinionRepository.findAllByBooksByIdSorted(bookId);
+    public List<OpinionResponse> getOpinionsByBookId(int bookId, User currentUser) {
+        List<Opinion> opinions = opinionRepository.findAllByBooksByIdSorted(bookId);
+
+        return opinions.stream().map(op -> {
+            String reactionStatus = "NONE";
+            if (currentUser != null) {
+                reactionStatus = opinionReactionRepository
+                        .findByUser_UserIdAndOpinion_OpinionId(currentUser.getUserId(), op.getOpinionId())
+                        .map(r -> r.getReaction().toString())
+                        .orElse("NONE");
+            }
+            return OpinionResponse.from(op, reactionStatus);
+        }).toList();
     }
 
+    public List<OpinionResponse> getOpinionsByUserId(int userId) {
+        List<Opinion> opinions = opinionRepository.findAllByUser_UserId(userId);
 
+        return opinions.stream()
+                .map(op -> OpinionResponse.from(op, "NONE")) // Mapowanie na DTO
+                .toList();
+    }
 
     public Optional<Opinion> getOpinionById(int opinionId){
         return opinionRepository.findById(opinionId);
@@ -79,6 +99,5 @@ public class OpinionService {
         opinion.setDislikes(dislikes);
         opinionRepository.save(opinion);
     }
-
 
 }

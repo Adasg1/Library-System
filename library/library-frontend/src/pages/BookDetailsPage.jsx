@@ -9,6 +9,7 @@ import {toast, ToastContainer} from "react-toastify";
 import RentBookModal from "../components/RentModal.jsx";
 import ManageCopiesModal from "../components/ManageCopiesModal.jsx";
 import BookCard from "../components/BookCard.jsx";
+import BookOpinions from "../components/BookOpinions.jsx";
 
 const BookDetailsPage = () => {
     const { id } = useParams();
@@ -285,6 +286,7 @@ const BookDetailsPage = () => {
                         </div>
                     </div>
                 )}
+                <BookOpinions bookId={book.bookId} user={user} />
 
             </div>
             <ManageCopiesModal

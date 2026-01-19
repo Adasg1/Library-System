@@ -12,6 +12,7 @@ import {
     EventNote,
     ArrowBack
 } from '@mui/icons-material';
+import UserOpinions from "../components/UserOpinions.jsx";
 
 const ProfilePage = () => {
     const { user } = useAuth();
@@ -23,12 +24,10 @@ const ProfilePage = () => {
         if (window.confirm('Czy chcesz przedłużyć termin zwrotu o 30 dni?')) {
             try {
                 await loanService.prolongLoan(loanId);
-                // Odśwież listę wypożyczeń po udanej operacji
                 const updatedLoans = await loanService.getMyLoans();
                 setLoans(updatedLoans);
                 alert('Termin został pomyślnie przedłużony.');
             } catch (error) {
-                // Obsługa błędów (np. przekroczenie limitu N razy lub rezerwacja)
                 const message = error.response?.data?.message || "Nie można przedłużyć tego wypożyczenia.";
                 alert(message);
             }
@@ -233,7 +232,9 @@ const ProfilePage = () => {
                             </div>
                         )}
                     </div>
-
+                    <div className="mt-8">
+                        <UserOpinions userId={user.id} />
+                    </div>
                 </div>
             </div>
         </div>

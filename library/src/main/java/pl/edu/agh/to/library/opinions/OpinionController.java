@@ -42,11 +42,18 @@ public class OpinionController {
     @GetMapping("")
     @PreAuthorize("permitAll()")
     public ResponseEntity<List<OpinionResponse>> getOpinions(
-            @RequestParam int bookId
+            @RequestParam int bookId,
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(
-                opinionService.getOpinionsByBookId(bookId).stream().map(OpinionResponse::from).toList()
-        );
+        return ResponseEntity.ok(opinionService.getOpinionsByBookId(bookId, user));
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<OpinionResponse>> getMyOpinions(
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(opinionService.getOpinionsByUserId(user.getUserId()));
     }
 
     @PatchMapping("/{opinionId}")
@@ -61,7 +68,7 @@ public class OpinionController {
             return check;
 
         return ResponseEntity.ok(
-                OpinionResponse.from(opinionService.updateOpinion(opinionId,request.content()))
+                OpinionResponse.from(opinionService.updateOpinion(opinionId, request.content()))
         );
     }
 
@@ -84,7 +91,7 @@ public class OpinionController {
         if (option.isEmpty())
             return ResponseEntity.notFound().build();
         Opinion opinion = option.get();
-        if (user.getRole() != Role.ADMIN && user != opinion.getUser())
+        if (user.getRole() != Role.ADMIN && user.getUserId() != opinion.getUser().getUserId())
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return null;
     }
