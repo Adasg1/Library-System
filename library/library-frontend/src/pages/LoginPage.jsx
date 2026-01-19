@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Container, TextField, Button, Typography, Paper, Alert, Box } from '@mui/material';
+import { Login, ArrowBack } from '@mui/icons-material';
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -28,8 +28,9 @@ const LoginPage = () => {
         return true;
     };
 
-    const handleLogin = async () => {
+    const handleLogin = async (e) => {
         setError("");
+        e.preventDefault();
 
         if(!validateForm()) return;
 
@@ -46,66 +47,68 @@ const LoginPage = () => {
     }
 
     return (
-        <Container maxWidth="xs">
-            <Paper elevation={3} sx={paperStyles}>
-                <Typography variant="h5" mb={3}>
-                    Logowanie
-                </Typography>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+            <div className="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
 
-                {error && (<Alert severity="error">{error}</Alert>)}
+                <div className="bg-[#646cff] p-8 text-center text-white">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white-20 rounded-full mb-4 backdrop-blur-sm">
+                        <Login sx={{fontSize: 32}}></Login>
+                    </div>
+                    <h2 className="text-3xl font-bold">Witaj ponownie!</h2>
+                    <p className="text-indigo-100 mt-2">Zaloguj się, aby zarządzać biblioteką.</p>
+                </div>
 
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    label="Adres Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    sx={textFieldStyles}
-                />
+                <div className="p-8">
+                    {error && (
+                        <div className="mb-6 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-bold border border-red-100 flex items-center">
+                            {error}
+                        </div>
+                    )}
 
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    label="Hasło"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    sx={textFieldStyles}
-                />
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-600 uppercase tracking-wide">Adres Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full border-2 border-gray-100 p-3 rounded-xl focus:border-[#646cff] focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all text-gray-700 font-medium"
+                                placeholder="jan.kowalski@example.com"
+                            />
+                        </div>
 
-                <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2, bgcolor: '#646cff', '&:hover': { bgcolor: '#535bf2' } }} onClick={handleLogin}>
-                    Zaloguj się
-                </Button>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-600 uppercase tracking-wide">Hasło</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full border-2 border-gray-100 p-3 rounded-xl focus:border-[#646cff] focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all text-gray-700 font-medium"
+                                placeholder="••••••••"
+                            />
+                        </div>
 
-                <Link to="/">
-                    <Button fullWidth variant="text" sx={{ color: '#aaa' }}>
-                        Powrót do strony głównej
-                    </Button>
-                </Link>
-            </Paper>
-        </Container>
+                        <button
+                            type="submit"
+                            className="w-full bg-[#646cff] hover:bg-[#535bf2] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+                        >
+                            Zaloguj się
+                        </button>
+                    </form>
+
+                    <div className="mt-8 flex items-center justify-between text-sm border-t border-gray-100 pt-6">
+                        <Link to="/" className="flex items-center gap-1 text-gray-500 hover:text-gray-900 transition-colors font-medium">
+                            <ArrowBack fontSize="inherit" /> Strona główna
+                        </Link>
+                        <span className="text-gray-400">|</span>
+                        <Link to="/register" className="text-[#646cff] hover:text-[#535bf2] font-bold">
+                            Nie masz konta? Zarejestruj się
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
-};
-
-// style
-const paperStyles = {
-    mt: 8,
-    p: 4,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#2a2a2a',
-    color: 'white',
-};
-
-const textFieldStyles = {
-    input: { color: 'white' },
-    label: { color: '#aaa' },
-    '& .MuiOutlinedInput-root': {
-        '& fieldset': { borderColor: '#555' }
-    }
 };
 
 export default LoginPage;
