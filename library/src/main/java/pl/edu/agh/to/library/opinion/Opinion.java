@@ -1,8 +1,8 @@
-package pl.edu.agh.to.library.opinions;
+package pl.edu.agh.to.library.opinion;
 
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.book.Book;
-import pl.edu.agh.to.library.opinion_reactions.OpinionReaction;
+import pl.edu.agh.to.library.opinion_reaction.OpinionReaction;
 import pl.edu.agh.to.library.user.User;
 
 import java.util.HashSet;

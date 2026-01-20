@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.opinions;
+package pl.edu.agh.to.library.opinion;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -7,10 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.to.library.opinion_reactions.Reaction;
-import pl.edu.agh.to.library.opinions.dto.CreateOpinionRequest;
-import pl.edu.agh.to.library.opinions.dto.OpinionResponse;
-import pl.edu.agh.to.library.opinions.dto.UpdateOpinionRequest;
+import pl.edu.agh.to.library.opinion.dto.CreateOpinionRequest;
+import pl.edu.agh.to.library.opinion.dto.OpinionResponse;
+import pl.edu.agh.to.library.opinion.dto.UpdateOpinionRequest;
 import pl.edu.agh.to.library.user.Role;
 import pl.edu.agh.to.library.user.User;
 

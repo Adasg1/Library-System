@@ -1,8 +1,8 @@
-package pl.edu.agh.to.library.opinion_reactions;
+package pl.edu.agh.to.library.opinion_reaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import pl.edu.agh.to.library.opinions.Opinion;
+import pl.edu.agh.to.library.opinion.Opinion;
 import pl.edu.agh.to.library.user.User;
 
 @Entity

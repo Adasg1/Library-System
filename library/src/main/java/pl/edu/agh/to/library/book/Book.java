@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import pl.edu.agh.to.library.bookcopy.BookCopy;
 import pl.edu.agh.to.library.category.Category;
-import pl.edu.agh.to.library.opinions.Opinion;
+import pl.edu.agh.to.library.opinion.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
 import java.time.LocalDateTime;
