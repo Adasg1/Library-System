@@ -1,16 +1,13 @@
-package pl.edu.agh.to.library.opinions;
+package pl.edu.agh.to.library.opinion;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.Book;
 import pl.edu.agh.to.library.book.BookRepository;
-import pl.edu.agh.to.library.opinion_reactions.OpinionReaction;
-import pl.edu.agh.to.library.opinion_reactions.OpinionReactionRepository;
-import pl.edu.agh.to.library.opinion_reactions.Reaction;
-import pl.edu.agh.to.library.opinions.dto.OpinionResponse;
+import pl.edu.agh.to.library.opinion_reaction.OpinionReaction;
+import pl.edu.agh.to.library.opinion_reaction.OpinionReactionRepository;
+import pl.edu.agh.to.library.opinion_reaction.Reaction;
+import pl.edu.agh.to.library.opinion.dto.OpinionResponse;
 import pl.edu.agh.to.library.user.User;
 
 import java.util.List;

@@ -1,8 +1,7 @@
-package pl.edu.agh.to.library.opinion_reactions;
+package pl.edu.agh.to.library.opinion_reaction;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.edu.agh.to.library.opinions.Opinion;
 
 import java.util.Optional;
 

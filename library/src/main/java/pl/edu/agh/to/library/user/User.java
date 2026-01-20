@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.edu.agh.to.library.loan.Loan;
-import pl.edu.agh.to.library.opinions.Opinion;
+import pl.edu.agh.to.library.opinion.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
 import java.util.ArrayList;

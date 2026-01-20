@@ -1,6 +1,6 @@
-package pl.edu.agh.to.library.opinions.dto;
+package pl.edu.agh.to.library.opinion.dto;
 
-import pl.edu.agh.to.library.opinions.Opinion;
+import pl.edu.agh.to.library.opinion.Opinion;
 
 public record OpinionResponse(
         int opinionId,

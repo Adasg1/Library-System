@@ -1,9 +1,9 @@
-package pl.edu.agh.to.library.opinion_reactions;
+package pl.edu.agh.to.library.opinion_reaction;
 
 
 import org.springframework.stereotype.Service;
-import pl.edu.agh.to.library.opinions.Opinion;
-import pl.edu.agh.to.library.opinions.OpinionService;
+import pl.edu.agh.to.library.opinion.Opinion;
+import pl.edu.agh.to.library.opinion.OpinionService;
 import pl.edu.agh.to.library.user.User;
 
 import java.util.Optional;

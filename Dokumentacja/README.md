@@ -1029,7 +1029,7 @@ Do aktualizacji wypożyczeń, których czas oddania minął wykorzystywany jest 
 
 
 
-## Operacje CRUD dla Rezerwacji
+## Operacje CRUD dla rezerwacji
 
 
 ### Złożenie rezerwacji
@@ -1138,6 +1138,138 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 ### Dodatkowo
 Do aktualizacji rezerwacji, których czas odbioru minął wykorzystywany jest ReservationScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status rezerwacji, których termin odbioru minął na CANCELED. Dostępne egzemplarze przypisuje do używników oczekujących w kolejce rezerwacji.
+
+## Operacje CRUD dla opinii
+
+### Złożenie opinii
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/opinion**  
+```json
+{
+  "bookId": 1,
+  "content": "Bardzo poważna opinia na temat książki"
+}
+```
+
+**Zwraca:**
+```json
+{
+  "opinionId": 1,
+  "content": "Bardzo poważna opinia na temat książki",
+  "likes": 0,
+  "dislikes": 0,
+  "nick": "JanuszK",
+  "userId": 1,
+  "bookId": 1,
+  "bookTitle": "Tytuł książki",
+  "userReaction": "NONE"
+}
+```
+
+> [!NOTE]  
+> Pseudonim użytkownika jest tworzony z imienia oraz pierwszej litery nazwiska użytkownika  
+> `userReaction` to reakcja zalogowanego użytkownika na daną opinię
+
+### Pobranie opinii dla książki
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/opinion?bookId={bookId}**
+
+**Zwraca:** *(tu dla bookId = 1)*
+```json
+[
+  {
+    "opinionId": 1,
+    "content": "Bardzo poważna opinia na temat książki",
+    "likes": 0,
+    "dislikes": 0,
+    "nick": "JanuszK",
+    "userId": 1,
+    "bookId": 1,
+    "bookTitle": "Tytuł książki",
+    "userReaction": "NONE"
+  }
+]
+```
+
+### Pobranie swoich opinii
+
+Dostępne dla: `Zalogowany użytkownik`
+
+**`GET` /api/opinion/my**
+
+**Zwraca:**
+```json
+[
+  {
+    "opinionId": 1,
+    "content": "Bardzo poważna opinia na temat książki",
+    "likes": 0,
+    "dislikes": 0,
+    "nick": "JanuszK",
+    "userId": 1,
+    "bookId": 1,
+    "bookTitle": "Tytuł książki",
+    "userReaction": "NONE"
+  }
+]
+```
+
+### Aktualizacja opinii
+
+Dostępne dla: `Zalogowany Użytkownik`, `Admin`
+
+**`PATCH` /api/opinion/{opinionId}**  
+```json
+{
+  "content": "Nadal poważna ale mniej negatywna opinia na temat książki"
+}
+```
+
+**Zwraca:** *(tu dla opinionId = 1)*
+```json
+{
+  "opinionId": 1,
+  "content": "Nadal poważna ale mniej negatywna opinia na temat książki",
+  "likes": 0,
+  "dislikes": 0,
+  "nick": "JanuszK",
+  "userId": 1,
+  "bookId": 1,
+  "bookTitle": "Tytuł książki",
+  "userReaction": "NONE"
+}
+```
+
+### Usuwanie opinii
+
+Dostępne dla: `Zalogowany Użytkownik`, `Admin`
+
+**`DELETE` /api/opinion/{opinionId}**  
+
+> [!NOTE]  
+> Użytkownik może edytować lub usuwać swoje recenzje. Admin może edytować lub usuwać recenzje wszystkich użytkowników
+
+### Reagowanie na opinie
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/opinion-reaction/{opinionId}?reaction={reaction}**  
+
+**Zwraca:** *(tu dla opinionId = 1, reaction = LIKE)*
+```json
+{
+  "reaction": "LIKE"
+}
+```
+
+**Logika Biznesowa**  
+Reakcje `LIKE` oraz `DISLIKE` są przechowywane w bazie. Mogą być zmieniane do woli z jednego na drugie. Reakcja `NONE` oznacza usunięcie reakcji z bazy
+
+
 ## System Powiadomień (NotificationService)
 
 Moduł powiadomień odpowiada za automatyczną komunikację z użytkownikami za pośrednictwem poczty elektronicznej. Serwis jest zintegrowany z warstwą logiki rezerwacji i aktywuje się w momencie zmiany statusu egzemplarza na dostępny.

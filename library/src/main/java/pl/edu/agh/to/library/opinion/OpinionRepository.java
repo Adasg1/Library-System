@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.opinions;
+package pl.edu.agh.to.library.opinion;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
