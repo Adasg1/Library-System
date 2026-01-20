@@ -693,6 +693,71 @@ Dostępne dla: `ADMIN`
 
 > `404 - Not Found` gdy książka o podanym id nie istnieje
 
+### Pobieranie najnowszych książek
+
+Pozwala wyświetlać użytkownkowi książki, które zostały dadane ostatnio
+
+**`GET` /api/book/newest**  
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+### Pobieranie najpopularniejszych ksiazek
+
+Pozwala wyświetlać użytkownkowi najpopularniejsze książki.
+
+**`GET` /api/book/popular**
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+### Pobieranie najpopularniejszych książek z kategorii innej książki
+
+Pozwala wyświetlać użytkownikowi propozycje książki z tych samych kategorii na stronie książki.
+
+**`GET` /api/book//related/{bookId}**
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+
+
 
 
 ### Operacje CRUD dla kopii książek
@@ -742,6 +807,19 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 ### Pobieranie wszystkich kopii książek
 
 Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki"
+    "isbn": "83-8257-131-X"
+    "availableCopies": 5
+  }
+]
+```
 
 **`GET` /api/bookcopy**
 
