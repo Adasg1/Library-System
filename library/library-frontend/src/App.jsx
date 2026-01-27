@@ -11,6 +11,7 @@ import BookListPage from "./pages/BookListPage.jsx";
 import BookFormPage from "./pages/BookFormPage.jsx";
 import BookDetailsPage from "./pages/BookDetailsPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import AdminLoansPage from "./pages/AdminLoansPage.jsx";
 
 function App() {
     return (
@@ -40,6 +41,7 @@ function App() {
 
                     {/* Panel Admina   */}
                     <Route path="/admin/users" element={<ProtectedRoute requiredRoles={['ADMIN']}><AdminPage /></ProtectedRoute>} />
+                    <Route path="/admin/loans" element={<ProtectedRoute requiredRoles={['ADMIN']}><AdminLoansPage /></ProtectedRoute>} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

@@ -86,6 +86,7 @@ Przedstawia kategorie, rodzaje i gatunki książek dostępnych w bibliotece
 * `String` description
 * `String` publisher
 * `int` publishYear
+* `LocalDateTime` createdAt
 * `Set<Category>` categories
 * `List<BookCopy>` bookCopies
 * `List<Reservation>` reservations
@@ -116,6 +117,7 @@ Enumerator - stan egzemplarza książki
 * `LocalDateTime` rentalDate
 * `LocalDateTime` dueDate
 * `LocalDateTime` returnDate
+* `int` timesProlonged
 
 Klasa przedstawia pożyczkę książki przez danego użytkownika, jej daty pożyczenia oraz oddania jak również jej status. Historia wypożyczeń jest przechowywana do celów archiwalnych
 
@@ -145,7 +147,32 @@ Przedstawia rezerwacje książek. Rezerwacje mogą być użyte gdy użytkownik 
 
 Enumerator - status rezerwacji
 
+### Opinion
+* `int` opinionId
+* `String` content
+* `int` likes
+* `int` dislikes
+* `Book` book
+* `User` user
+* `Set<OpinionReaction>` reactions
 
+Przedstawia opinię wydaną przez użytkownika na temat danej książki
+
+### OpinionReaction
+
+* `int` reactionId
+* `User` user
+* `Opinion` opinion
+* `Reaction` reaction
+
+Przedstawia reakcję użytkownika na temat danej opinii. Jest to Like lub Dislike
+
+### Reaction
+* `NONE`
+* `LIKE`
+* `DISLIKE`
+
+Enumerator - reakcja na opinię
 
 ## Operacje CRUD dla użytkownika
 
@@ -666,6 +693,71 @@ Dostępne dla: `ADMIN`
 
 > `404 - Not Found` gdy książka o podanym id nie istnieje
 
+### Pobieranie najnowszych książek
+
+Pozwala wyświetlać użytkownkowi książki, które zostały dadane ostatnio
+
+**`GET` /api/book/newest**  
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+### Pobieranie najpopularniejszych ksiazek
+
+Pozwala wyświetlać użytkownkowi najpopularniejsze książki.
+
+**`GET` /api/book/popular**
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+### Pobieranie najpopularniejszych książek z kategorii innej książki
+
+Pozwala wyświetlać użytkownikowi propozycje książki z tych samych kategorii na stronie książki.
+
+**`GET` /api/book//related/{bookId}**
+
+Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki",
+    "isbn": "83-8257-131-X",
+    "availableCopies": 5
+  }
+]
+```
+
+
+
 
 
 ### Operacje CRUD dla kopii książek
@@ -715,6 +807,19 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
 ### Pobieranie wszystkich kopii książek
 
 Dostępne dla: `Brak ograniczeń`
+
+**Zwraca:**
+```json
+[
+  {
+    "bookId": 1,
+    "title": "Tytuł Książki",
+    "author": "Autor książki"
+    "isbn": "83-8257-131-X"
+    "availableCopies": 5
+  }
+]
+```
 
 **`GET` /api/bookcopy**
 
@@ -828,7 +933,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "ACTIVE",
   "rentalDate": "2026-01-09T08:39:48.372451538",
   "dueDate": "2026-02-08T08:39:48.372504871",
-  "returnDate": null
+  "returnDate": null,
+  "timesProlonged": 0
 }
 ```
 
@@ -853,7 +959,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "RETURNED",
   "rentalDate": "2026-01-09T08:39:48.372452",
   "dueDate": "2026-02-08T08:39:48.372505",
-  "returnDate": "2026-01-09T08:42:52.917809157"
+  "returnDate": "2026-01-09T08:42:52.917809157",
+  "timesProlonged": 0
 }
 ```
 
@@ -878,7 +985,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
   "status": "RETURNED",
   "rentalDate": "2026-01-09T08:39:48.372452",
   "dueDate": "2026-02-08T08:39:48.372505",
-  "returnDate": "2026-01-09T08:42:52.917809157"
+  "returnDate": "2026-01-09T08:42:52.917809157",
+  "timesProlonged": 0
 }
 ```
 
@@ -901,7 +1009,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "RETURNED",
     "rentalDate": "2026-01-09T08:39:48.372452",
     "dueDate": "2026-02-08T08:39:48.372505",
-    "returnDate": "2026-01-09T08:42:52.917809"
+    "returnDate": "2026-01-09T08:42:52.917809",
+    "timesProlonged": 0
   },
   {
     "loanId": 2,
@@ -912,7 +1021,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "ACTIVE",
     "rentalDate": "2026-01-09T08:46:59.63366",
     "dueDate": "2026-02-08T08:46:59.633697",
-    "returnDate": null
+    "returnDate": null,
+    "timesProlonged": 0
   }
 ]
 ```
@@ -935,7 +1045,8 @@ Dostępne dla: `ADMIN`, `LIBRARIAN`
     "status": "RETURNED",
     "rentalDate": "2026-01-09T08:39:48.372452",
     "dueDate": "2026-02-08T08:39:48.372505",
-    "returnDate": "2026-01-09T08:42:52.917809157"
+    "returnDate": "2026-01-09T08:42:52.917809157",
+    "timesProlonged": 0
   }
 ]
 ```
@@ -958,17 +1069,45 @@ Dostępne dla: `Zalogowany Użytkownik`
     "status": "ACTIVE",
     "rentalDate": "2026-01-09T08:46:59.63366",
     "dueDate": "2026-02-08T08:46:59.633697",
-    "returnDate": null
+    "returnDate": null,
+    "timesProlonged": 0
   }
 ]
 ```
+
+### Przedłużenie wypożyczenia
+
+**`POST` /api/prolong/{loanId}**
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**Zwraca:**
+```json
+[
+  {
+    "loanId": 2,
+    "userId": 1,
+    "userEmail": "grzegorz1987@fred.net",
+    "bookCopyId": 3,
+    "bookTitle": "Tytuł Książki",
+    "status": "ACTIVE",
+    "rentalDate": "2026-01-09T08:46:59.63366",
+    "dueDate": "2026-03-08T08:46:59.633697",
+    "returnDate": null,
+    "timesProlonged": 2
+  }
+]
+```
+
+> [!NOTE]  
+> Wypożyczenie możemy przedłużać maksymalnie trzy razy.
 
 ### Dodatkowo
 Do aktualizacji wypożyczeń, których czas oddania minął wykorzystywany jest LoanScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status wypożyczeń po terminie na OVERDUE.
 
 
 
-## Operacje CRUD dla Rezerwacji
+## Operacje CRUD dla rezerwacji
 
 
 ### Złożenie rezerwacji
@@ -1077,6 +1216,138 @@ Dostępne dla: `Zalogowany Użytkownik`
 
 ### Dodatkowo
 Do aktualizacji rezerwacji, których czas odbioru minął wykorzystywany jest ReservationScheduler. Odpala się on każdego dnia o 1 w nocy i aktualizuje status rezerwacji, których termin odbioru minął na CANCELED. Dostępne egzemplarze przypisuje do używników oczekujących w kolejce rezerwacji.
+
+## Operacje CRUD dla opinii
+
+### Złożenie opinii
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/opinion**  
+```json
+{
+  "bookId": 1,
+  "content": "Bardzo poważna opinia na temat książki"
+}
+```
+
+**Zwraca:**
+```json
+{
+  "opinionId": 1,
+  "content": "Bardzo poważna opinia na temat książki",
+  "likes": 0,
+  "dislikes": 0,
+  "nick": "JanuszK",
+  "userId": 1,
+  "bookId": 1,
+  "bookTitle": "Tytuł książki",
+  "userReaction": "NONE"
+}
+```
+
+> [!NOTE]  
+> Pseudonim użytkownika jest tworzony z imienia oraz pierwszej litery nazwiska użytkownika  
+> `userReaction` to reakcja zalogowanego użytkownika na daną opinię
+
+### Pobranie opinii dla książki
+
+Dostępne dla: `Brak ograniczeń`
+
+**`GET` /api/opinion?bookId={bookId}**
+
+**Zwraca:** *(tu dla bookId = 1)*
+```json
+[
+  {
+    "opinionId": 1,
+    "content": "Bardzo poważna opinia na temat książki",
+    "likes": 0,
+    "dislikes": 0,
+    "nick": "JanuszK",
+    "userId": 1,
+    "bookId": 1,
+    "bookTitle": "Tytuł książki",
+    "userReaction": "NONE"
+  }
+]
+```
+
+### Pobranie swoich opinii
+
+Dostępne dla: `Zalogowany użytkownik`
+
+**`GET` /api/opinion/my**
+
+**Zwraca:**
+```json
+[
+  {
+    "opinionId": 1,
+    "content": "Bardzo poważna opinia na temat książki",
+    "likes": 0,
+    "dislikes": 0,
+    "nick": "JanuszK",
+    "userId": 1,
+    "bookId": 1,
+    "bookTitle": "Tytuł książki",
+    "userReaction": "NONE"
+  }
+]
+```
+
+### Aktualizacja opinii
+
+Dostępne dla: `Zalogowany Użytkownik`, `Admin`
+
+**`PATCH` /api/opinion/{opinionId}**  
+```json
+{
+  "content": "Nadal poważna ale mniej negatywna opinia na temat książki"
+}
+```
+
+**Zwraca:** *(tu dla opinionId = 1)*
+```json
+{
+  "opinionId": 1,
+  "content": "Nadal poważna ale mniej negatywna opinia na temat książki",
+  "likes": 0,
+  "dislikes": 0,
+  "nick": "JanuszK",
+  "userId": 1,
+  "bookId": 1,
+  "bookTitle": "Tytuł książki",
+  "userReaction": "NONE"
+}
+```
+
+### Usuwanie opinii
+
+Dostępne dla: `Zalogowany Użytkownik`, `Admin`
+
+**`DELETE` /api/opinion/{opinionId}**  
+
+> [!NOTE]  
+> Użytkownik może edytować lub usuwać swoje recenzje. Admin może edytować lub usuwać recenzje wszystkich użytkowników
+
+### Reagowanie na opinie
+
+Dostępne dla: `Zalogowany Użytkownik`
+
+**`POST` /api/opinion-reaction/{opinionId}?reaction={reaction}**  
+
+**Zwraca:** *(tu dla opinionId = 1, reaction = LIKE)*
+```json
+{
+  "reaction": "LIKE"
+}
+```
+
+**Logika Biznesowa**  
+Reakcje `LIKE` oraz `DISLIKE` są przechowywane w bazie. Mogą być zmieniane do woli z jednego na drugie. Reakcja `NONE` oznacza usunięcie reakcji z bazy
+
+
 ## System Powiadomień (NotificationService)
 
 Moduł powiadomień odpowiada za automatyczną komunikację z użytkownikami za pośrednictwem poczty elektronicznej. Serwis jest zintegrowany z warstwą logiki rezerwacji i aktywuje się w momencie zmiany statusu egzemplarza na dostępny.
@@ -1305,3 +1576,106 @@ Aby uruchomić aplikację kliencką lokalnie:
     * Tabela wszystkich użytkowników w systemie.
     * Akcje: Usuwanie kont, edycja ról (nadawanie uprawnień).
     ![alt text](image-13.png)
+
+# Frontend - opis (M3)
+
+### Kluczowe nowości w M3:
+1. **System Opinii i Interakcji (Opinion + Reaction):**
+   * Wprowadzono moduł recenzji książek, umożliwiający **zalogowanym użytkownikom** dodawanie, edytowanie oraz usuwanie własnych opinii.
+   * Zaimplementowano system reakcji **Like / Dislike**, pozwalający użytkownikom oceniać przydatność recenzji innych czytelników.
+   * Dodano w profilu użytkownika sekcję **„Moje Opinie” (`UserOpinions`)**, umożliwiającą centralne zarządzanie wszystkimi wystawionymi recenzjami.
+
+2. **Zaawansowane Zarządzanie Wypożyczeniami:**
+   * Dodano możliwość **samodzielnego przedłużania wypożyczeń (prolongata)** przez użytkownika – maksymalnie **3 razy** dla jednego wypożyczenia.
+   * Rozszerzono model danych o pola śledzące **liczbę wykonanych prolongat**.
+   * Rozbudowano backend o obsługę **zwrotów na podstawie identyfikatora egzemplarza (`copyId`)**.
+
+3. **Wyszukiwanie i Sortowanie (`BookListPage`):**
+   * Wprowadzono dynamiczną **wyszukiwarkę (Search Bar)** filtrującą katalog książek w czasie rzeczywistym po **tytule i autorze**.
+   * Zaimplementowano **wielokryterialne sortowanie** (na podstawie statystyk tj. ilość wypożyczeń danej książki, czyli jej popularność) obsługiwane przez backend (alfabetycznie, popularność, nowość, dostępność egzemplarzy).
+
+4. **Panel Monitoringu i Statystyk (`AdminLoansPage`):**
+   * Stworzono dedykowany widok dla administratorów i bibliotekarzy do monitorowania wszystkich aktualnie aktywnych wypożyczeń w systemie.
+   * Widok pozwala na szybką identyfikację wypożyczeń po terminie (overdue) oraz umożliwia pracownikowi zatwierdzenie zwrotu książki jednym kliknięciem.
+
+5. **Modernizacja UI i UX:**
+   * Przeprowadzono **całkowity rework stron Logowania i Rejestracji**:
+     * odświeżony wygląd,
+     * poprawiona responsywność,
+     * rozbudowana walidacja danych formularzy.
+   * Znacznie usprawniono widok **Szczegółów Książki (`BookDetailsPage`)**:
+     * lepsza ekspozycja informacji o egzemplarzach,
+     * pełna integracja sekcji opinii z systemem reakcji.
+
+## Wygląd i działanie aplikacji (milestone M3)
+
+### Pełna lista podstron (Routing)
+
+**1. Strefa Publiczna (Dostępna dla każdego)**
+* `/` – **Strona Główna (HomePage) (reader)**
+    * Dla niezalogowanych: Landing page z zachętą do logowania.
+    ![alt text](image-14.png)
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-17.png)
+  * `/` – **Strona Główna (HomePage) (admin)**
+    * Dla zalogowanych: Dashboard nawigacyjny.
+    ![alt text](image-18.png)
+* `/login` – **Logowanie (LoginPage)**
+    * Formularz logowania do systemu.
+    ![alt text](image-15.png)
+* `/register` – **Rejestracja (RegisterPage)**
+    * Formularz zakładania nowego konta czytelnika.
+    ![alt text](image-16.png)
+
+**2. Strefa Użytkownika (Dostępna dla: READER, LIBRARIAN, ADMIN)**
+* `/books` – **Katalog Książek (BookListPage) (reader)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-28.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (reader)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-29.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (reader)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-27.png)
+
+* `/books` – **Katalog Książek (BookListPage) (admin)** 
+    * Lista wszystkich dostępnych książek z filtrowaniem po kategoriach.
+    ![alt text](image-19.png)
+
+* `/books/details/:id` – **Szczegóły Książki (BookDetailsPage) (admin)** 
+    * Widok pojedynczej książki (opis, autor, wydawnictwo).
+    * Tabela egzemplarzy (dostępność).
+    * Akcje: Rezerwacja (Reader) lub Wypożyczenie (Librarian/Admin).
+    ![alt text](image-20.png)
+    ![alt text](image-21.png)
+
+* `/profile` – **Profil Użytkownika (ProfilePage) (admin)**
+    * Dane osobowe zalogowanego użytkownika.
+    * Historia wypożyczeń (aktywne i zwrócone).
+    * Lista aktualnych rezerwacji.
+    ![alt text](image-24.png)
+
+**3. Strefa Bibliotekarza (Dostępna dla: LIBRARIAN, ADMIN)**
+* `/books/new` – **Dodawanie Książki (BookFormPage)**
+    * Formularz tworzenia nowej pozycji w bazie danych.
+    ![alt text](image-23.png)
+* `/books/update/:id` – **Edycja Książki (BookFormPage)**
+    * Ten sam formularz w trybie edycji (pola wypełnione danymi edytowanej książki).
+    ![alt text](image-22.png)
+    
+
+**4. Strefa Administratora (Dostępna dla: ADMIN)**
+* `/admin/users` – **Zarządzanie Użytkownikami (AdminPage)**
+    * Tabela wszystkich użytkowników w systemie.
+    * Akcje: Usuwanie kont, edycja ról (nadawanie uprawnień).
+    ![alt text](image-25.png)
+    
+* `/admin/loans` – **Statystyki i Aktywne Wypożyczenia (AdminLoansPage)**
+    * Panel monitorujący wszystkie aktywne wypożyczenia w systemie, ułatwiający kontrolę nad obiegiem książek..
+    ![alt text](image-26.png)

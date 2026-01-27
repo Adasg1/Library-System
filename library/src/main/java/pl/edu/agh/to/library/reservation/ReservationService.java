@@ -3,6 +3,10 @@ package pl.edu.agh.to.library.reservation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.*;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookCopyRepository;
+import pl.edu.agh.to.library.bookcopy.BookCopyService;
+import pl.edu.agh.to.library.bookcopy.BookStatus;
 import pl.edu.agh.to.library.notification.NotificationService;
 import pl.edu.agh.to.library.reservation.dto.ReservationResponse;
 import pl.edu.agh.to.library.user.User;
@@ -108,7 +112,6 @@ public class ReservationService {
             reservationRepository.save(reservation);
             notificationService.sendBookAvailableNotification(reservation.getUser(), copy.getBook().getTitle());
             System.out.println("Sending email for book copy with id" + copy.getBookCopyId());
-            // TODO Logika wysyłania powiadomień np. na email
         }
         else {
             bookCopyService.updateStatus(copy.getBookCopyId(), BookStatus.AVAILABLE);
@@ -134,12 +137,8 @@ public class ReservationService {
         reservationRepository.saveAll(expiredReservations);
     }
 
-    public void updateReservationAfterLoan(int userId, int bookId) {
-        var statuses = List.of(ReservationStatus.READY);
-        Optional<Reservation> userReservation = reservationRepository
-                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(userId, bookId, statuses);
-
-        userReservation.ifPresent(reservation -> {
+    public void updateReservationAfterLoan(Optional<Reservation> reservationOpt) {
+        reservationOpt.ifPresent(reservation -> {
             reservation.setStatus(ReservationStatus.COMPLETED);
             reservationRepository.save(reservation);
         });
@@ -186,5 +185,12 @@ public class ReservationService {
         }
 
         throw new IllegalStateException("This copy is reserved! No more available copies!");
+    }
+
+    public void releaseCopyReservation(Optional<Reservation> existingReservation) {
+        var reservation = existingReservation.get();
+        var copy = reservation.getAssignedCopy();
+        copy.setStatus(BookStatus.AVAILABLE);
+        bookCopyRepository.save(copy);
     }
 }

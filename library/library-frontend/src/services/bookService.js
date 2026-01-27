@@ -7,8 +7,8 @@ export const bookService = {
         return response.data;
     },
 
-    async getAllBooksBrief() {
-        const response = await api.get("/book/brief");
+    async getAllBooksBrief(sort="title") {
+        const response = await api.get("/book/brief", {params: { sort }});
         return response.data;
     },
 
@@ -22,8 +22,13 @@ export const bookService = {
         return response.data;
     },
 
-    async getBooksByCategory(categoryId) {
-        const response = await api.get(`/book/category/${categoryId}`);
+    async getBooksByCategory(categoryId, sort="title") {
+        const response = await api.get(`/book/category/${categoryId}`, {params: {sort}});
+        return response.data;
+    },
+
+    async getRelatedBooks(bookId) {
+        const response = await api.get(`/book/related/${bookId}`);
         return response.data;
     },
 
@@ -44,9 +49,17 @@ export const bookService = {
     // Usuwanie książki
     async deleteBook(bookId) {
         await api.delete(`/book/${bookId}`);
+    },
+
+    // Statystyki
+    async getNewestBooks() {
+        const response = await api.get("/book/newest");
+        return response.data;
+    },
+
+    async getPopularBooks(limit = 4) {
+        const response = await api.get("/book/popular", {params: {limit}});
+        return response.data;
     }
-
-
-
 
 };

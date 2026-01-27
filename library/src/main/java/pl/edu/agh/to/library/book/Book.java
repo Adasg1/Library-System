@@ -2,8 +2,12 @@ package pl.edu.agh.to.library.book;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
+import pl.edu.agh.to.library.category.Category;
+import pl.edu.agh.to.library.opinion.Opinion;
 import pl.edu.agh.to.library.reservation.Reservation;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +34,13 @@ public class Book {
     private String publisher;
 
     private int publishYear;
+
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Opinion> opinions = new ArrayList<>();
+
 
     @ManyToMany
     @JoinTable(
@@ -58,6 +69,7 @@ public class Book {
         this.categories = new HashSet<>();
         this.bookCopies = new ArrayList<>();
         this.reservations = new ArrayList<>();
+        this.createdAt = LocalDateTime.now();
     }
 
     public Book() {
@@ -117,6 +129,10 @@ public class Book {
         this.publishYear = publishYear;
     }
 
+    public List<Opinion> getOpinions() { return opinions; }
+
+    public void setOpinions(List<Opinion> opinions) { this.opinions = opinions; }
+
     public Set<Category> getCategories() {
         return categories;
     }
@@ -139,6 +155,10 @@ public class Book {
 
     public List<BookCopy> getBookCopies() {
         return bookCopies;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     //Wszystko z dołu jest raczej do usunięcia

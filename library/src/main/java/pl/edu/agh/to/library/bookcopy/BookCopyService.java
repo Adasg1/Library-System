@@ -1,8 +1,10 @@
-package pl.edu.agh.to.library.book;
+package pl.edu.agh.to.library.bookcopy;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.edu.agh.to.library.book.dto.BookCopyResponse;
+import pl.edu.agh.to.library.book.Book;
+import pl.edu.agh.to.library.book.BookService;
+import pl.edu.agh.to.library.bookcopy.dto.BookCopyResponse;
 
 import java.util.ArrayList;
 import java.util.List;

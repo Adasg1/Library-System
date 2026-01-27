@@ -1,10 +1,16 @@
 package pl.edu.agh.to.library.book;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.to.library.book.dto.BookBriefResponse;
 import pl.edu.agh.to.library.book.dto.BookCreationRequest;
 import pl.edu.agh.to.library.book.dto.BookUpdateRequest;
+import pl.edu.agh.to.library.bookcopy.BookStatus;
+import pl.edu.agh.to.library.category.Category;
+import pl.edu.agh.to.library.category.CategoryService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -98,8 +104,17 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    public List<BookBriefResponse> getAllBookBriefs() {
-        return bookRepository.findAllBooksWithAvailableCount();
+    public List<BookBriefResponse> getAllBookBriefs(String sortType) {
+        if (sortType == null) {
+            return bookRepository.findAllOrderedByTitle();
+        }
+
+        return switch (sortType) {
+            case "newest" -> bookRepository.findAllOrderedByNewest();
+            case "availability" -> bookRepository.findAllOrderedByAvailability();
+            case "popular" -> bookRepository.findAllOrderedByPopularity();
+            default -> bookRepository.findAllOrderedByTitle();
+        };
     }
 
     public Optional<Book> getBookById(int id){
@@ -110,12 +125,21 @@ public class BookService {
         return bookRepository.findBookByIdWithAvailableCount(id);
     }
 
-    public List<BookBriefResponse> getBooksByCategoryId(int categoryId) {
+    public List<BookBriefResponse> getBooksByCategoryId(int categoryId, String sortType) {
         if (categoryService.getCategoryById(categoryId).isEmpty()) {
             throw new NullPointerException("Category by that id not found");
         }
 
-        return bookRepository.findAllByCategoryId(categoryId);
+        if (sortType == null) {
+            return bookRepository.findByCategoryIdOrderedByTitle(categoryId);
+        }
+
+        return switch (sortType) {
+            case "newest" -> bookRepository.findByCategoryIdOrderedByNewest(categoryId);
+            case "availability" -> bookRepository.findByCategoryIdOrderedByAvailability(categoryId);
+            case "popular" -> bookRepository.findByCategoryIdOrderedByPopularity(categoryId);
+            default -> bookRepository.findByCategoryIdOrderedByTitle(categoryId);
+        };
     }
 
     public boolean deleteBook(int id) {
@@ -164,4 +188,27 @@ public class BookService {
         return false;
     }
 
+    public List<BookBriefResponse> getNewestBooks(){
+        return bookRepository.findTop8ByOrderByCreatedAtDesc().stream()
+                .map(this::mapToBriefResponse)
+                .toList();
+    }
+
+    public List<BookBriefResponse> getPopularBooks(int limit){
+        return bookRepository.findTopPopularBooks(PageRequest.of(0, limit)).stream()
+                .map(this::mapToBriefResponse)
+                .toList();
+    }
+
+    public BookBriefResponse mapToBriefResponse(Book book){
+        int availableCopies = (int) book.getBookCopies().stream()
+                .filter(c -> c.getStatus() == BookStatus.AVAILABLE)
+                .count();
+        return new BookBriefResponse(book, availableCopies);
+    }
+
+    public List<BookBriefResponse> getRelatedBooks(int bookId) {
+        Pageable tenCopies = PageRequest.of(0, 10);
+        return bookRepository.findRelatedBooksOrderByPopularity(bookId, tenCopies);
+    }
 }

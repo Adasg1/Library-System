@@ -1,4 +1,4 @@
-package pl.edu.agh.to.library.book;
+package pl.edu.agh.to.library.category;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

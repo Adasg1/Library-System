@@ -1,7 +1,8 @@
-package pl.edu.agh.to.library.book;
+package pl.edu.agh.to.library.category;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import pl.edu.agh.to.library.book.Book;
 
 import java.util.ArrayList;
 import java.util.List;

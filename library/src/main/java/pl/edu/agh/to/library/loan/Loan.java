@@ -1,7 +1,7 @@
 package pl.edu.agh.to.library.loan;
 
 import jakarta.persistence.*;
-import pl.edu.agh.to.library.book.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
 import pl.edu.agh.to.library.user.User;
 
 import java.time.LocalDateTime;
@@ -29,6 +29,8 @@ public class Loan {
     private LocalDateTime dueDate;
 
     private LocalDateTime returnDate;
+
+    private Integer timesProlonged = 0;
 
     public Loan(User user, BookCopy bookCopy, LocalDateTime rentalDate, LocalDateTime dueDate){
         this.user = user;
@@ -80,5 +82,12 @@ public class Loan {
     public void setReturnDate(LocalDateTime returnDate) {
         this.returnDate = returnDate;
     }
-    //endregion
+
+    public Integer getTimesProlonged() {
+        return timesProlonged;
+    }
+
+    public void setTimesProlonged(Integer timesProlonged) {
+        this.timesProlonged = timesProlonged;
+    }
 }

@@ -2,10 +2,12 @@ package pl.edu.agh.to.library.loan;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.edu.agh.to.library.book.BookCopy;
-import pl.edu.agh.to.library.book.BookCopyService;
-import pl.edu.agh.to.library.book.BookStatus;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookCopyService;
+import pl.edu.agh.to.library.bookcopy.BookStatus;
 import pl.edu.agh.to.library.loan.dto.LoanResponse;
+import pl.edu.agh.to.library.reservation.Reservation;
+import pl.edu.agh.to.library.reservation.ReservationRepository;
 import pl.edu.agh.to.library.reservation.ReservationService;
 import pl.edu.agh.to.library.reservation.ReservationStatus;
 import pl.edu.agh.to.library.user.User;
@@ -13,20 +15,25 @@ import pl.edu.agh.to.library.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LoanService {
+
+    private static final int MAX_PROLONGATIONS = 3;
 
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
     private final BookCopyService bookCopyService;
     private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
 
-    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookCopyService bookCopyService, ReservationService reservationService) {
+    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookCopyService bookCopyService, ReservationService reservationService, ReservationRepository reservationRepository) {
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookCopyService = bookCopyService;
         this.reservationService = reservationService;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -36,8 +43,15 @@ public class LoanService {
 
         BookCopy copy = bookCopyService.getCopyEntityById(copyId);
 
+        var statuses = List.of(ReservationStatus.READY);
+        Optional<Reservation> existingReservation = reservationRepository
+                .findFirstByUser_UserIdAndBook_BookIdAndStatusIn(user.getUserId(), copy.getBook().getBookId(), statuses);
+
         if (copy.getStatus() == BookStatus.RESERVED) {
             copy = reservationService.swapReservation(userId, copy);
+        }
+        else if (copy.getStatus() == BookStatus.AVAILABLE && existingReservation.isPresent()) {
+            reservationService.releaseCopyReservation(existingReservation);
         }
         else if (copy.getStatus() != BookStatus.AVAILABLE){
             throw new IllegalStateException("There is no book copy available");
@@ -47,7 +61,7 @@ public class LoanService {
         loan.setStatus(LoanStatus.ACTIVE);
 
         bookCopyService.updateStatus(copyId, BookStatus.LOANED);
-        reservationService.updateReservationAfterLoan(userId, copy.getBook().getBookId());
+        reservationService.updateReservationAfterLoan(existingReservation);
 
         return LoanResponse.from(loanRepository.save(loan));
     }
@@ -55,7 +69,7 @@ public class LoanService {
     @Transactional
     public LoanResponse returnLoan(int loanId) {
         Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new NullPointerException("Loan not found"));
+                .orElseThrow(() -> new IllegalStateException("Loan not found"));
 
         loan.setStatus(LoanStatus.RETURNED);
         loan.setReturnDate(LocalDateTime.now());
@@ -64,6 +78,16 @@ public class LoanService {
         reservationService.redistributeBookCopy(copy);
 
         return LoanResponse.from(loanRepository.save(loan));
+    }
+
+    @Transactional
+    public LoanResponse returnLoanByCopyId(int copyId) {
+
+        List<LoanStatus> statuses = List.of(LoanStatus.ACTIVE, LoanStatus.OVERDUE);
+        Loan loan = loanRepository.findFirstByBookCopy_BookCopyIdAndStatusIn(copyId, statuses)
+                .orElseThrow(() -> new IllegalStateException("Nie znaleziono aktywnego wypożyczenia dla egzemplarza ID: " + copyId));
+
+        return this.returnLoan(loan.getLoanId());
     }
 
     @Transactional
@@ -96,4 +120,31 @@ public class LoanService {
     public List<LoanResponse> getLoansByUser(int userId) {
         return loanRepository.findByUser_UserId(userId).stream().map(LoanResponse::from).toList();
     }
+
+    public List<LoanResponse> getAllActiveLoans() {
+        return loanRepository.findAllActiveLoans().stream()
+                .map(LoanResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public LoanResponse prolongLoan(int loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new NullPointerException("Loan not found"));
+
+        if (loan.getStatus() == LoanStatus.OVERDUE) {
+            throw new IllegalStateException("Can't prolong expired loan");
+        }
+
+        if (loan.getTimesProlonged() >= MAX_PROLONGATIONS) {
+            throw new IllegalStateException("Maximum prolongation limit reached");
+        }
+
+        loan.setDueDate(loan.getDueDate().plusDays(30));
+        loan.setTimesProlonged(loan.getTimesProlonged() + 1);
+
+        return LoanResponse.from(loanRepository.save(loan));
+    }
+
+
 }

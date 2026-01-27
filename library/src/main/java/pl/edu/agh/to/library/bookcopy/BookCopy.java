@@ -1,6 +1,7 @@
-package pl.edu.agh.to.library.book;
+package pl.edu.agh.to.library.bookcopy;
 
 import jakarta.persistence.*;
+import pl.edu.agh.to.library.book.Book;
 
 @Entity
 @Table(name="BookCopies")

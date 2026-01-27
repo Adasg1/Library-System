@@ -1,8 +1,8 @@
-package pl.edu.agh.to.library.book.dto;
+package pl.edu.agh.to.library.bookcopy.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import pl.edu.agh.to.library.book.BookCopy;
-import pl.edu.agh.to.library.book.BookStatus;
+import pl.edu.agh.to.library.bookcopy.BookCopy;
+import pl.edu.agh.to.library.bookcopy.BookStatus;
 
 public record BookCopyResponse(
         @NotBlank int id,

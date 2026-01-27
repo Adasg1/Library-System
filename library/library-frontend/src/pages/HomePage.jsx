@@ -1,20 +1,103 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from "../context/AuthContext.jsx";
+import { bookService } from "../services/bookService.js";
+import { reservationService } from "../services/reservationService.js";
+import BookCard from "../components/BookCard.jsx";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
     BookOutlined,
     AccountCircleOutlined,
     AddBoxOutlined,
     PeopleAltOutlined,
-    LibraryBooks
+    LibraryBooks,
+    TrendingUp,
+    NewReleases
 } from '@mui/icons-material';
 
 const HomePage = () => {
     const { user } = useAuth();
     const isStaff = user?.role === 'ADMIN' || user?.role === 'LIBRARIAN';
 
+    const [newestBooks, setNewestBooks] = useState([]);
+    const [popularBooks, setPopularBooks] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            fetchStats();
+        }
+    }, [user]);
+
+    const fetchStats = async () => {
+        setLoading(true);
+        try {
+            const [newest, popular] = await Promise.all([
+                bookService.getNewestBooks(),
+                bookService.getPopularBooks(4),
+            ]);
+            setNewestBooks(newest);
+            setPopularBooks(popular);
+        } catch (error) {
+            console.error("Błąd pobierania statystyk: ", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReservation = async (book) => {
+        if (window.confirm(`Czy na pewno chcesz zarezerwować książkę: ${book.title}`)) {
+            try {
+                const reservation = await reservationService.createReservation({bookId: book.bookId})
+                if (reservation.status === "READY") {
+                    const formattedDate = new Date(reservation.maxPickupDate).toLocaleString('pl-PL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    toast.success(
+                        <div>
+                            <p className="font-bold">📚 Zarezerwowano: "{book.title}"</p>
+                            <p className="text-sm">Czas na odbiór do: <strong>{formattedDate}</strong></p>
+                        </div>,
+                        { position: "top-right", autoClose: 5000 }
+                    );
+                } else if (reservation.status === "WAITING") {
+                    toast.success(`📚 Zarezerwowano: "${book.title}"! Powiadomimy cie mailowo, gdy tytuł będzie dostępny`, {
+                        position: "top-right",
+                        autoClose: 5000,
+                    });
+                }
+
+            } catch (e) {
+                console.log(e);
+                toast.error(`📚 Rezerwacja "${book.title}"  nie powiodła się!`, {
+                    position: "top-right",
+                    autoClose: 5000,
+                });
+            }
+        }
+    }
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Czy na pewno chcesz usunąć tę książkę?")) {
+            try {
+                await bookService.deleteBook(id);
+                setBooks(prevBooks => prevBooks.filter(book => book.bookId !== id));
+            } catch (error) {
+                console.error("Błąd usuwania:", error);
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-12">
+            <ToastContainer />
+
             {/* Header / Hero Section */}
             <header className="max-w-6xl mx-auto mb-12 text-center">
                 <div className="inline-block p-3 bg-indigo-50 rounded-2xl mb-4">
@@ -28,9 +111,9 @@ const HomePage = () => {
                 </p>
             </header>
 
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 {user ? (
-                    <div className="space-y-8">
+                    <div className="space-y-12">
                         {/* Powitanie */}
                         <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm">
                             <h2 className="text-2xl font-bold">
@@ -39,51 +122,82 @@ const HomePage = () => {
                             <p className="text-gray-500 mt-1">Cieszymy się, że znowu jesteś z nami.</p>
                         </div>
 
-                        {/* Grid z kafelkami */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Katalog */}
-                            <Link to="/books" className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-[#646cff] transition-all duration-300 shadow-sm hover:shadow-md">
-                                <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#646cff]/10">
-                                    <BookOutlined className="text-[#646cff]" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-[#646cff]">Przeglądaj katalog</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed">Znajdź swoją kolejną ulubioną lekturę wśród tysięcy dostępnych pozycji.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Link to="/books" className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-indigo-400 shadow-sm hover:shadow-md transition-all">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><BookOutlined /></div>
+                                <div className="font-bold">Katalog</div>
                             </Link>
-
-                            {/* Profil */}
-                            <Link to="/profile" className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-[#646cff] transition-all duration-300 shadow-sm hover:shadow-md">
-                                <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#646cff]/10">
-                                    <AccountCircleOutlined className="text-[#646cff]" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-[#646cff]">Mój profil</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed">Sprawdź status swoich wypożyczeń i edytuj dane profilowe.</p>
+                            <Link to="/profile" className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-indigo-400 shadow-sm hover:shadow-md transition-all">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><AccountCircleOutlined /></div>
+                                <div className="font-bold">Mój Profil</div>
                             </Link>
-
-                            {/* Sekcja Staff / Admin */}
                             {isStaff && (
-                                <Link to="/books/new" className="group bg-white p-6 rounded-xl border border-orange-100 hover:border-orange-400 transition-all duration-300 shadow-sm hover:shadow-md">
-                                    <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-100">
-                                        <AddBoxOutlined className="text-orange-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 group-hover:text-orange-600">Dodaj Książkę</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed">Narzędzie dla personelu: wprowadź nową dostawę do systemu.</p>
+                                <Link to="/books/new" className="flex items-center gap-4 p-4 bg-white rounded-xl border border-orange-200 hover:border-orange-400 shadow-sm hover:shadow-md transition-all">
+                                    <div className="p-3 bg-orange-50 text-orange-600 rounded-lg"><AddBoxOutlined /></div>
+                                    <div className="font-bold">Dodaj Książkę</div>
                                 </Link>
                             )}
-
                             {user?.role === 'ADMIN' && (
-                                <Link to="/admin/users" className="group bg-white p-6 rounded-xl border border-red-100 hover:border-red-400 transition-all duration-300 shadow-sm hover:shadow-md">
-                                    <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-red-100">
-                                        <PeopleAltOutlined className="text-red-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 group-hover:text-red-600">Użytkownicy</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed">Administracja: zarządzaj uprawnieniami i kontami czytelników.</p>
+                                <Link to="/admin/users" className="flex items-center gap-4 p-4 bg-white rounded-xl border border-red-200 hover:border-red-400 shadow-sm hover:shadow-md transition-all">
+                                    <div className="p-3 bg-red-50 text-red-600 rounded-lg"><PeopleAltOutlined /></div>
+                                    <div className="font-bold">Użytkownicy</div>
+                                </Link>
+                            )}
+                            {isStaff && (
+                                <Link to="/admin/loans" className="flex items-center gap-4 p-4 bg-white rounded-xl border border-red-200 hover:border-red-400 shadow-sm hover:shadow-md transition-all">
+                                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg"><BookOutlined /></div>
+                                    <div className="font-bold">Zarządzanie wypożyczeniami</div>
                                 </Link>
                             )}
                         </div>
+
+
+                        {popularBooks.length > 0 && (
+                            <section>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <TrendingUp className="text-red-500" />
+                                    <h2 className="text-2xl font-bold text-gray-800">Najchętniej wypożyczane</h2>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {popularBooks.map(book => (
+                                        <BookCard
+                                            key={book.bookId}
+                                            book={book}
+                                            user={user}
+                                            onReservation={handleReservation}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {newestBooks.length > 0 && (
+                            <section>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <NewReleases className="text-green-500" />
+                                    <h2 className="text-2xl font-bold text-gray-800">Ostatnio dodane nowości</h2>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {newestBooks.map(book => (
+                                        <BookCard
+                                            key={book.bookId}
+                                            book={book}
+                                            user={user}
+                                            onReservation={handleReservation}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {loading && <div className="text-center py-10 text-gray-400">Ładowanie statystyk...</div>}
                     </div>
                 ) : (
                     /* Widok dla niezalogowanego */
                     <div className="bg-white border border-gray-200 p-12 rounded-3xl text-center shadow-xl max-w-3xl mx-auto">
+                        {/* ... tu było ok ... */}
                         <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-indigo-50 rounded-full text-[#646cff]">
                             <LibraryBooks sx={{ fontSize: 40 }} />
                         </div>
